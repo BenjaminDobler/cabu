@@ -1,0 +1,93 @@
+<div class="host-container">
+  <div class="header">
+    <button class="btn-back" (click)="goBack()">← Back</button>
+    <h1>Host Game</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Creating game room...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-card">
+      <h2>Error</h2>
+      <p>{{ error() }}</p>
+      <button class="btn btn-primary" (click)="goBack()">Go Back</button>
+    </div>
+  }
+
+  @if (roomCode() && !loading()) {
+    <div class="room-card">
+      <h2>Game Room Created!</h2>
+
+      <div class="room-code-section">
+        <label>Share this code with players:</label>
+        <div class="room-code-display">
+          <div class="code">{{ roomCode() }}</div>
+          <button class="btn-copy" (click)="copyRoomCode()" [class.copied]="copied()">
+            {{ copied() ? '✓ Copied!' : 'Copy' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="status-section">
+        <div class="status-item">
+          <span class="label">Players:</span>
+          <span class="value">{{ playerCount() }}/4</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Status:</span>
+          <span class="value" [class]="'status-' + status()">{{ status() }}</span>
+        </div>
+      </div>
+
+      @if (playerCount() > 1) {
+        <div class="connected-message">
+          <div class="success-icon">✓</div>
+          <p>Players connected! You can start the game.</p>
+        </div>
+      } @else {
+        <div class="waiting-message">
+          <div class="waiting-icon">⏳</div>
+          <p>Waiting for players to join...</p>
+        </div>
+      }
+    </div>
+
+    @if (status() === 'connected') {
+      <div class="test-section">
+        <h2>Test Connection</h2>
+        <div class="test-controls">
+          <input
+            type="text"
+            [value]="testMessage()"
+            (input)="testMessage.set($any($event.target).value)"
+            placeholder="Type a test message..."
+            class="test-input"
+            (keyup.enter)="sendTestMessage()"
+          />
+          <button class="btn btn-primary" (click)="sendTestMessage()">
+            Send
+          </button>
+        </div>
+
+        @if (messages().length > 0) {
+          <div class="messages">
+            <h3>Messages:</h3>
+            <div class="message-list">
+              @for (msg of messages(); track msg.timestamp) {
+                <div class="message">
+                  <span class="message-from">{{ msg.from }}:</span>
+                  <span class="message-text">{{ msg.message }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

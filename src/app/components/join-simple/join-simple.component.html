@@ -1,0 +1,92 @@
+<div class="join-container">
+  <div class="header">
+    <button class="btn-back" (click)="goBack()">← Back</button>
+    <h1>Join Game</h1>
+  </div>
+
+  @if (status() === 'disconnected' || status() === 'failed') {
+    <div class="join-card">
+      <h2>Enter Room Code</h2>
+      <p class="instruction">Enter the 6-character code shared by the host:</p>
+
+      <div class="join-form">
+        <input
+          type="text"
+          [value]="roomCode()"
+          (input)="roomCode.set($any($event.target).value.toUpperCase())"
+          placeholder="ABC123"
+          class="room-input"
+          maxlength="6"
+          [disabled]="joining()"
+          (keyup.enter)="joinGame()"
+        />
+
+        <button
+          class="btn btn-primary"
+          (click)="joinGame()"
+          [disabled]="joining() || !roomCode().trim()"
+        >
+          @if (joining()) {
+            <span class="spinner-small"></span>
+            Joining...
+          } @else {
+            Join Game
+          }
+        </button>
+      </div>
+
+      @if (error()) {
+        <div class="error-message">
+          {{ error() }}
+        </div>
+      }
+    </div>
+  }
+
+  @if (status() === 'connecting') {
+    <div class="connecting-card">
+      <div class="spinner"></div>
+      <h2>Connecting...</h2>
+      <p>Establishing peer-to-peer connection</p>
+    </div>
+  }
+
+  @if (status() === 'connected') {
+    <div class="connected-card">
+      <div class="success-icon">✓</div>
+      <h2>Connected!</h2>
+      <p>You're now connected to the host.</p>
+    </div>
+
+    <div class="test-section">
+      <h2>Test Connection</h2>
+      <div class="test-controls">
+        <input
+          type="text"
+          [value]="testMessage()"
+          (input)="testMessage.set($any($event.target).value)"
+          placeholder="Type a test message..."
+          class="test-input"
+          (keyup.enter)="sendTestMessage()"
+        />
+        <button class="btn btn-primary" (click)="sendTestMessage()">
+          Send
+        </button>
+      </div>
+
+      @if (messages().length > 0) {
+        <div class="messages">
+          <h3>Messages:</h3>
+          <div class="message-list">
+            @for (msg of messages(); track msg.timestamp) {
+              <div class="message">
+                <span class="message-from">{{ msg.from }}:</span>
+                <span class="message-text">{{ msg.message }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

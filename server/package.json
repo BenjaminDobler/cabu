@@ -1,0 +1,17 @@
+{
+  "name": "cabu-signaling-server",
+  "version": "1.0.0",
+  "description": "Minimal WebSocket signaling server for Cabu card game",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["webrtc", "signaling", "websocket"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
