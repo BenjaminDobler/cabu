@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   // This will be updated after Render deployment
-  signalingServerUrl: 'wss://cabu-signaling-server.onrender.com'
+  signalingServerUrl: 'wss://cabu.onrender.com'
 };
