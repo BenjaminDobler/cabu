@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cabu-signaling-server
+    runtime: node
+    env: node
+    region: frankfurt  # or oregon, singapore - choose closest to your users
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: PORT
+        value: 8080
+    healthCheckPath: /

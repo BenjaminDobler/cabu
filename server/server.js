@@ -1,7 +1,27 @@
 import { WebSocketServer } from 'ws';
+import { createServer } from 'http';
 
 const PORT = process.env.PORT || 8080;
-const wss = new WebSocketServer({ port: PORT });
+
+// Create HTTP server for health checks
+const server = createServer((req, res) => {
+  if (req.url === '/' || req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'ok',
+      service: 'cabu-signaling-server',
+      rooms: rooms.size,
+      connections: clients.size,
+      timestamp: new Date().toISOString()
+    }));
+  } else {
+    res.writeHead(404);
+    res.end('Not Found');
+  }
+});
+
+// Create WebSocket server attached to HTTP server
+const wss = new WebSocketServer({ server });
 
 // Store rooms: Map<roomCode, Set<WebSocket>>
 const rooms = new Map();
@@ -9,7 +29,11 @@ const rooms = new Map();
 // Store client metadata: Map<WebSocket, { roomCode, role }>
 const clients = new Map();
 
-console.log(`🚀 Signaling server running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`🚀 Signaling server running on port ${PORT}`);
+  console.log(`   HTTP health check: http://localhost:${PORT}/health`);
+  console.log(`   WebSocket endpoint: ws://localhost:${PORT}`);
+});
 
 function generateRoomCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -173,7 +197,7 @@ setInterval(() => {
 
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, closing server...');
-  wss.close(() => {
+  server.close(() => {
     console.log('Server closed');
     process.exit(0);
   });

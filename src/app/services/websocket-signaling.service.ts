@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface SignalingMessage {
   type: string;
@@ -16,7 +17,7 @@ export interface SignalingMessage {
 })
 export class WebSocketSignalingService {
   private ws: WebSocket | null = null;
-  private serverUrl = 'ws://localhost:8080'; // Will be configurable
+  private serverUrl = environment.signalingServerUrl;
 
   // Signals
   private connected = signal(false);
@@ -34,20 +35,7 @@ export class WebSocketSignalingService {
   public messages$ = new Subject<SignalingMessage>();
 
   constructor() {
-    // Set server URL from environment or default
-    if (typeof window !== 'undefined') {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.hostname;
-
-      // For local development
-      if (host === 'localhost' || host === '127.0.0.1') {
-        this.serverUrl = 'ws://localhost:8080';
-      } else {
-        // For production, you'll need to set your deployed server URL
-        // For now, using environment variable or falling back to same host
-        this.serverUrl = `${protocol}//${host}:8080`;
-      }
-    }
+    console.log('Signaling server URL:', this.serverUrl);
   }
 
   /**
