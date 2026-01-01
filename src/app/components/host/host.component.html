@@ -1,0 +1,111 @@
+<div class="host-container">
+  <div class="header">
+    <button class="btn-back" (click)="goBack()">← Back</button>
+    <h1>Host Game</h1>
+    <div class="connection-count">
+      <span class="badge">{{ connectedCount() }}/3 Connected</span>
+    </div>
+  </div>
+
+  @if (scanningSlotIndex() !== null) {
+    <div class="scanner-modal">
+      <div class="scanner-content">
+        <h2>Scan Guest Answer (Slot {{ scanningSlotIndex()! + 1 }})</h2>
+        <app-qr-scanner (scanned)="onAnswerScanned($event)" />
+        <button class="btn btn-secondary" (click)="stopScanning()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="slots-container">
+    @for (slot of slots(); track slot.index) {
+      <div class="slot-card" [class.connected]="slot.status === 'connected'">
+        <div class="slot-header">
+          <h2>Guest {{ slot.index + 1 }}</h2>
+          <span class="status-badge" [class]="'status-' + slot.status">
+            {{ getSlotStatus(slot.index) }}
+          </span>
+        </div>
+
+        @if (slotOffers()[slot.index]; as offer) {
+          <div class="slot-content">
+            @if (slot.status === 'waiting' || slot.status === 'connecting') {
+              <div class="connection-section">
+                <p class="instruction">Share this connection info with Guest {{ slot.index + 1 }}:</p>
+                <app-connection-display [data]="offer" />
+
+                <div class="answer-section">
+                  <h3>Receive Guest Answer</h3>
+                  <button class="btn btn-primary" (click)="startScanningForSlot(slot.index)">
+                    Scan QR Code
+                  </button>
+                  <div class="paste-area">
+                    <label>Or paste answer code:</label>
+                    <textarea
+                      placeholder="Paste guest answer here..."
+                      rows="3"
+                      (input)="pasteAnswer(slot.index, $event)"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (slot.status === 'connected') {
+              <div class="connected-message">
+                <div class="success-icon">✓</div>
+                <p>Guest {{ slot.index + 1 }} is connected!</p>
+              </div>
+            }
+
+            @if (slot.status === 'failed') {
+              <div class="error-message">
+                <p>Connection failed. Please try again.</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="loading">
+            <p>Generating connection offer...</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (connectedCount() > 0) {
+    <div class="test-section">
+      <h2>Test Connection</h2>
+      <div class="test-controls">
+        <input
+          type="text"
+          [value]="testMessage()"
+          (input)="testMessage.set($any($event.target).value)"
+          placeholder="Type a test message..."
+          class="test-input"
+          (keyup.enter)="sendTestMessage()"
+        />
+        <button class="btn btn-primary" (click)="sendTestMessage()">
+          Send to All
+        </button>
+      </div>
+
+      @if (messages().length > 0) {
+        <div class="messages">
+          <h3>Received Messages:</h3>
+          <div class="message-list">
+            @for (msg of messages(); track msg.timestamp) {
+              <div class="message">
+                <span class="message-from">{{ msg.from }}:</span>
+                <span class="message-text">{{ msg.message }}</span>
+                <span class="message-time">{{ msg.timestamp | date:'short' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

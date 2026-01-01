@@ -1,0 +1,33 @@
+<div class="qr-scanner">
+  @if (scanError()) {
+    <div class="error-message">
+      <p>{{ scanError() }}</p>
+      @if (cameraPermission() === false) {
+        <button class="btn btn-small" (click)="requestPermission()">
+          Request Camera Permission
+        </button>
+      }
+    </div>
+  }
+
+  <div class="video-container">
+    <video #video class="scanner-video"></video>
+    @if (!scanning()) {
+      <div class="scanner-overlay">
+        <p>Camera not active</p>
+      </div>
+    }
+  </div>
+
+  <div class="controls">
+    @if (!scanning()) {
+      <button class="btn btn-primary" (click)="startScanning()">
+        Start Scanning
+      </button>
+    } @else {
+      <button class="btn btn-secondary" (click)="stopScanning()">
+        Stop Scanning
+      </button>
+    }
+  </div>
+</div>
