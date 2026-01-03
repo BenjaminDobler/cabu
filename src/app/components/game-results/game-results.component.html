@@ -187,15 +187,31 @@
 
       <!-- Action Buttons -->
       <div class="action-buttons">
-        <button class="btn btn-secondary" (click)="newGame()">
-          <span class="btn-icon">🏠</span>
-          <span>New Game</span>
-        </button>
+        @if (preparingNewGame()) {
+          <div class="preparing-game">
+            <div class="spinner-small"></div>
+            <p>Preparing new game...</p>
+          </div>
+        } @else {
+          <button class="btn btn-secondary" (click)="newGame()">
+            <span class="btn-icon">🏠</span>
+            <span>New Game</span>
+          </button>
 
-        <button class="btn btn-primary" (click)="playAgain()">
-          <span class="btn-icon">🔄</span>
-          <span>Play Again</span>
-        </button>
+          @if (isHost() && players().length > 1) {
+            <!-- Host in multiplayer -->
+            <button class="btn btn-primary" (click)="playAgain()">
+              <span class="btn-icon">🔄</span>
+              <span>Play Again with {{ players().length }} Players</span>
+            </button>
+          } @else {
+            <!-- Single player or guest -->
+            <button class="btn btn-primary" (click)="playAgain()">
+              <span class="btn-icon">🔄</span>
+              <span>Play Again</span>
+            </button>
+          }
+        }
       </div>
 
       <!-- Share Section (Future Enhancement) -->

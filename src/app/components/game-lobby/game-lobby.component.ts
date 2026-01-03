@@ -34,14 +34,22 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   settings = signal<GameSettings | null>(null);
   questions = signal<QuizQuestion[]>([]);
   questionTypeLabels = QUESTION_TYPE_LABELS;
+  private lastSharedPlayerCount = 0;
 
   constructor() {
     // Listen for new players joining (host only)
     effect(() => {
       const players = this.players();
-      if (this.webrtcService.hosting() && players.length > 1) {
-        // Send game data to newly joined players
+      const currentCount = players.length;
+
+      // Only share data when player count actually increases (not on every signal update)
+      if (this.webrtcService.hosting() && currentCount > this.lastSharedPlayerCount && currentCount > 1) {
+        console.log(`New player joined, sharing game data (count: ${this.lastSharedPlayerCount} -> ${currentCount})`);
+        this.lastSharedPlayerCount = currentCount;
         this.shareGameData();
+      } else if (this.webrtcService.hosting() && currentCount === 1) {
+        // Initialize for host-only
+        this.lastSharedPlayerCount = 1;
       }
     });
   }
@@ -64,6 +72,14 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
       this.settings.set(settings);
       this.questions.set(questions);
+
+      // Check if already hosting (returning to lobby after a game)
+      if (this.webrtcService.hosting() && this.webrtcService.roomCode()) {
+        console.log('Already hosting, reusing existing lobby');
+        this.showNameInput.set(false);
+        this.loading.set(false);
+        return;
+      }
 
       // Check if player name already exists in sessionStorage
       const savedName = sessionStorage.getItem('playerName');

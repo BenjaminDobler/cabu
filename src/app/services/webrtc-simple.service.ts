@@ -36,6 +36,7 @@ export class WebRTCSimpleService {
   private receivedMessages = signal<GameMessage[]>([]);
   private currentPlayer = signal<PlayerInfo | null>(null);
   private playersList = signal<PlayerInfo[]>([]);
+  private hasJoinedAsGuest = false;
 
   // Public signals
   public readonly status = this.connectionStatus.asReadonly();
@@ -171,6 +172,7 @@ export class WebRTCSimpleService {
     this.connectionStatus.set('disconnected');
     this.receivedMessages.set([]);
     this.playersList.set([]);
+    this.hasJoinedAsGuest = false;
   }
 
   /**
@@ -194,8 +196,6 @@ export class WebRTCSimpleService {
       switch (state) {
         case 'connected':
           this.connectionStatus.set('connected');
-          // Send player info to host
-          this.sendPlayerJoinedMessage();
           break;
         case 'disconnected':
         case 'closed':
@@ -271,6 +271,12 @@ export class WebRTCSimpleService {
    * Send player-joined message after connection established
    */
   private sendPlayerJoinedMessage(): void {
+    // Ensure we only send this once as a guest
+    if (this.hasJoinedAsGuest) {
+      console.log('Already sent player-joined message, skipping');
+      return;
+    }
+
     const player = this.currentPlayer();
     if (!player) return;
 
@@ -281,7 +287,9 @@ export class WebRTCSimpleService {
       data: { player }
     };
 
+    console.log('Guest sending player-joined message:', player.name, player.id);
     this.sendGameMessage(message);
+    this.hasJoinedAsGuest = true;
   }
 
   /**
@@ -310,8 +318,10 @@ export class WebRTCSimpleService {
     if (!this.dataChannel) return;
 
     this.dataChannel.onopen = () => {
-      console.log('Data channel opened');
+      console.log('Guest data channel opened - sending player info to host');
       this.connectionStatus.set('connected');
+      // Send player info to host now that channel is ready
+      this.sendPlayerJoinedMessage();
     };
 
     this.dataChannel.onclose = () => {
@@ -326,6 +336,14 @@ export class WebRTCSimpleService {
     this.dataChannel.onmessage = (event) => {
       try {
         const message: GameMessage = JSON.parse(event.data);
+
+        // Handle player list updates
+        if (message.type === 'player-list-update') {
+          const data = message.data as { players: PlayerInfo[] };
+          this.playersList.set(data.players);
+          console.log('Guest received player list update:', data.players.length, 'players');
+        }
+
         this.receivedMessages.update(messages => [...messages, message]);
       } catch (error) {
         console.error('Error parsing message:', error);
@@ -338,7 +356,7 @@ export class WebRTCSimpleService {
    */
   private setupDataChannelForGuest(guestId: string, channel: RTCDataChannel): void {
     channel.onopen = () => {
-      console.log(`Data channel opened with guest ${guestId}`);
+      console.log(`Host: Data channel opened with guest ${guestId}, waiting for player-joined message`);
     };
 
     channel.onclose = () => {
@@ -363,9 +381,12 @@ export class WebRTCSimpleService {
    * Handle message from a guest player
    */
   private handleGuestMessage(guestId: string, message: GameMessage): void {
+    console.log('Host received message from guest:', message.type, 'from:', message.from);
+
     // Handle player-joined messages
     if (message.type === 'player-joined') {
       const playerData = message.data as { player: PlayerInfo };
+      console.log('Host processing player-joined:', playerData.player.name, playerData.player.id);
       this.addPlayer(playerData.player);
     }
 
@@ -377,18 +398,64 @@ export class WebRTCSimpleService {
    * Add a new player to the players list
    */
   private addPlayer(player: PlayerInfo): void {
+    let wasAdded = false;
+
     this.playersList.update(players => {
-      // Check if player already exists
-      const exists = players.some(p => p.id === player.id);
-      if (exists) {
-        // Update existing player
-        return players.map(p => p.id === player.id ? { ...player, connected: true } : p);
+      // Check if player already exists with same data
+      const existing = players.find(p => p.id === player.id);
+
+      if (existing) {
+        // Check if data actually changed
+        if (existing.name === player.name && existing.connected === true && existing.role === player.role) {
+          console.log(`Player ${player.name} (${player.id}) already exists with same data, skipping update`);
+          wasAdded = false;
+          return players; // Return same array reference to prevent signal update
+        } else {
+          // Update existing player with new data
+          console.log(`Updating existing player: ${player.name} (${player.id})`);
+          wasAdded = false;
+          return players.map(p => p.id === player.id ? { ...player, connected: true } : p);
+        }
       } else {
         // Add new player
+        console.log(`Adding new player: ${player.name} (${player.id})`);
+        wasAdded = true;
         return [...players, { ...player, connected: true }];
       }
     });
-    console.log(`Player added: ${player.name} (${player.id})`);
+
+    if (wasAdded || this.playersList().length > 1) {
+      console.log(`Player list after update:`, this.playersList().map(p => `${p.name}(${p.id})`));
+
+      // Broadcast updated player list to all connected players (host only)
+      if (this.isHost()) {
+        this.broadcastPlayerList();
+      }
+    }
+  }
+
+  /**
+   * Broadcast current player list to all connected players (host only)
+   */
+  private broadcastPlayerList(): void {
+    if (!this.isHost()) return;
+
+    const openChannels = Array.from(this.peerConnections.values()).filter(
+      p => p.dataChannel?.readyState === 'open'
+    ).length;
+
+    const message: GameMessage = {
+      type: 'player-list-update',
+      from: 'host',
+      timestamp: Date.now(),
+      data: {
+        players: this.playersList()
+      }
+    };
+
+    this.sendGameMessage(message);
+    console.log(`Broadcasting player list (${this.playersList().length} players) to ${openChannels} connected guests`);
+    console.log('Players:', this.playersList().map(p => `${p.name}(${p.id})`));
   }
 
   /**

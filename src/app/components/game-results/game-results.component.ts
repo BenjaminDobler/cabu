@@ -1,8 +1,10 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PlayerScore, GameSettings } from '../../models/game.model';
 import { WebRTCSimpleService } from '../../services/webrtc-simple.service';
+import { GameMessage } from '../../models/connection.model';
+import { MusicService } from '../../services/music.service';
 
 interface PlayerScoreWithName extends PlayerScore {
   playerName: string;
@@ -18,6 +20,7 @@ interface PlayerScoreWithName extends PlayerScore {
 export class GameResultsComponent implements OnInit {
   private router = inject(Router);
   private webrtcService = inject(WebRTCSimpleService);
+  private musicService = inject(MusicService);
 
   // Game data
   scores = signal<PlayerScoreWithName[]>([]);
@@ -28,6 +31,41 @@ export class GameResultsComponent implements OnInit {
   error = signal<string | null>(null);
   showRoundBreakdown = signal(false);
   selectedPlayer = signal<PlayerScoreWithName | null>(null);
+  preparingNewGame = signal(false);
+
+  // Multiplayer state
+  isHost = this.webrtcService.hosting;
+  players = this.webrtcService.players;
+
+  // Track processed messages
+  private lastProcessedMessageIndex = -1;
+
+  constructor() {
+    // Listen for host starting a new game (guests only)
+    effect(() => {
+      if (!this.isHost()) {
+        const messages = this.webrtcService.messages();
+
+        // Process only new messages
+        for (let i = this.lastProcessedMessageIndex + 1; i < messages.length; i++) {
+          const message = messages[i];
+          this.lastProcessedMessageIndex = i;
+
+          if (message.type === 'game-start') {
+            console.log('Guest: Host started a new game, navigating to lobby...');
+            // Store the new game data
+            const { settings, questions } = message.data;
+            sessionStorage.setItem('gameSettings', JSON.stringify(settings));
+            sessionStorage.setItem('gameQuestions', JSON.stringify(questions));
+            sessionStorage.removeItem('gameScores');
+
+            // Navigate to lobby
+            this.router.navigate(['/lobby']);
+          }
+        }
+      }
+    });
+  }
 
   ngOnInit(): void {
     // Load scores from session storage
@@ -135,11 +173,49 @@ export class GameResultsComponent implements OnInit {
   }
 
   // Play again with same settings
-  playAgain(): void {
-    // Keep settings, clear scores, go back to lobby
-    sessionStorage.removeItem('gameScores');
-    sessionStorage.removeItem('gameQuestions');
-    this.router.navigate(['/setup']);
+  async playAgain(): Promise<void> {
+    const settings = this.settings();
+    if (!settings) {
+      this.error.set('No settings found');
+      return;
+    }
+
+    this.preparingNewGame.set(true);
+
+    try {
+      // Generate new questions with same settings
+      console.log('Generating new questions for play again...');
+      const questions = await this.musicService.generateQuestions(settings);
+
+      // Clear old scores
+      sessionStorage.removeItem('gameScores');
+
+      // Store new questions
+      sessionStorage.setItem('gameQuestions', JSON.stringify(questions));
+
+      // If host in multiplayer, notify all guests to go to lobby
+      if (this.isHost() && this.players().length > 1) {
+        const message: GameMessage = {
+          type: 'game-start', // Reuse this to signal new game
+          from: 'host',
+          timestamp: Date.now(),
+          data: {
+            settings,
+            questions
+          }
+        };
+
+        console.log('Host notifying guests to prepare for new game');
+        this.webrtcService.sendGameMessage(message);
+      }
+
+      // Navigate to lobby
+      this.router.navigate(['/lobby']);
+    } catch (err: any) {
+      console.error('Error preparing new game:', err);
+      this.error.set(err.message || 'Failed to prepare new game');
+      this.preparingNewGame.set(false);
+    }
   }
 
   // New game (clear everything)

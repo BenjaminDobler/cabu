@@ -25,6 +25,7 @@ export interface PlayerInfo {
 export type GameMessageType =
   | 'player-joined'
   | 'player-left'
+  | 'player-list-update'
   | 'round-start'
   | 'answer-submitted'
   | 'round-end'
@@ -47,6 +48,10 @@ export interface PlayerJoinedData {
 
 export interface PlayerLeftData {
   playerId: string;
+}
+
+export interface PlayerListUpdateData {
+  players: PlayerInfo[];
 }
 
 export interface RoundStartData {

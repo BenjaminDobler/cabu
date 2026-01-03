@@ -30,6 +30,7 @@ export class GamePlayComponent implements OnInit, OnDestroy {
 
   // Answer collection (host only)
   private pendingAnswers = new Map<string, { answer: string; submittedAt: number }>();
+  private answersProcessedForRound = -1; // Track which round we've processed
 
   // Round results for all players
   roundResults = signal<any[]>([]);
@@ -56,13 +57,19 @@ export class GamePlayComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   roundStartTime = 0;
 
+  // Track processed messages to prevent infinite loops
+  private lastProcessedMessageIndex = -1;
+
   constructor() {
     // Listen for messages from WebRTC
     effect(() => {
       const messages = this.webrtcService.messages();
-      if (messages.length > 0) {
-        const lastMessage = messages[messages.length - 1];
-        this.handleGameMessage(lastMessage);
+
+      // Process only new messages we haven't seen yet
+      for (let i = this.lastProcessedMessageIndex + 1; i < messages.length; i++) {
+        console.log(`Processing message ${i + 1}/${messages.length}:`, messages[i].type);
+        this.handleGameMessage(messages[i]);
+        this.lastProcessedMessageIndex = i;
       }
     });
   }
@@ -196,12 +203,21 @@ export class GamePlayComponent implements OnInit, OnDestroy {
    * Check if all players submitted answers
    */
   private checkAllAnswersSubmitted(): void {
+    const currentRoundNum = this.currentRound();
+
+    // Prevent processing the same round multiple times
+    if (this.answersProcessedForRound === currentRoundNum) {
+      console.log(`Round ${currentRoundNum} answers already processed, skipping`);
+      return;
+    }
+
     const players = this.players();
     const allSubmitted = players.every(p =>
       p.id === 'host' ? this.hasSubmitted() : this.pendingAnswers.has(p.id)
     );
 
     if (allSubmitted && players.length > 1) {
+      console.log(`All ${players.length} players submitted answers for round ${currentRoundNum}, processing...`);
       // All players submitted, process results
       this.processAllAnswers();
     }
@@ -213,6 +229,10 @@ export class GamePlayComponent implements OnInit, OnDestroy {
   private processAllAnswers(): void {
     const question = this.currentQuestion();
     if (!question) return;
+
+    // Mark this round as processed
+    this.answersProcessedForRound = this.currentRound();
+    console.log(`Processing answers for round ${this.answersProcessedForRound}`);
 
     const results: any[] = [];
 
@@ -255,6 +275,13 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     // Store results locally for host too
     this.roundResults.set(results);
 
+    // Set the host's own isCorrect status from their result
+    const hostResult = results.find(r => r.playerId === 'host');
+    if (hostResult) {
+      this.isCorrect.set(hostResult.correct);
+      console.log(`Host answer was ${hostResult.correct ? 'CORRECT' : 'INCORRECT'}`);
+    }
+
     // Broadcast results with detailed info
     const roundEndMessage: GameMessage = {
       type: 'round-end',
@@ -288,10 +315,13 @@ export class GamePlayComponent implements OnInit, OnDestroy {
 
     // Find this player's result
     const playerId = this.currentPlayer()?.id;
+    if (!playerId) return;
+
     const myResult = data.results.find((r: any) => r.playerId === playerId);
 
     if (myResult) {
       this.isCorrect.set(myResult.correct);
+      console.log(`Guest answer was ${myResult.correct ? 'CORRECT' : 'INCORRECT'}`);
 
       // Update guest's own score from the broadcast data
       const playerScore = this.scores().get(playerId);
@@ -441,6 +471,11 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     this.isCorrect.set(null);
     this.answerSubmittedAt.set(null);
     this.roundStartTime = Date.now();
+
+    // Reset answer processing state for new round (host only)
+    if (this.isHost()) {
+      this.pendingAnswers.clear();
+    }
 
     // Set timer
     if (settings && settings.timeLimit > 0) {
@@ -698,7 +733,7 @@ export class GamePlayComponent implements OnInit, OnDestroy {
       // Calculate total
       const subtotal = basePoints + speedBonus;
       const withStreak = subtotal * streakMultiplier;
-      const totalPoints = Math.round(withStreak * difficultyMultiplier);
+      totalPoints = Math.round(withStreak * difficultyMultiplier);
 
       // Update score
       const roundScore: RoundScore = {

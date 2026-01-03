@@ -27,13 +27,18 @@ export class GameJoinComponent implements OnDestroy {
   status = this.webrtcService.status;
   players = this.webrtcService.players;
 
+  // Track processed messages to prevent infinite loops
+  private lastProcessedMessageIndex = -1;
+
   constructor() {
     // Listen for game start from host
     effect(() => {
       const messages = this.webrtcService.messages();
-      if (messages.length > 0) {
-        const lastMessage = messages[messages.length - 1];
-        this.handleGameMessage(lastMessage);
+
+      // Process only new messages we haven't seen yet
+      for (let i = this.lastProcessedMessageIndex + 1; i < messages.length; i++) {
+        this.handleGameMessage(messages[i]);
+        this.lastProcessedMessageIndex = i;
       }
     });
   }
