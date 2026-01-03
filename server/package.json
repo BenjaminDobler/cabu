@@ -1,17 +1,21 @@
 {
   "name": "cabu-signaling-server",
   "version": "1.0.0",
-  "description": "Minimal WebSocket signaling server for Cabu card game",
+  "description": "WebSocket signaling server + Spotify API proxy for Cabu music quiz game",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "keywords": ["webrtc", "signaling", "websocket"],
+  "keywords": ["webrtc", "signaling", "websocket", "spotify", "music-quiz"],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "spotify-web-api-node": "^5.0.2",
+    "dotenv": "^16.4.0",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12"
   }
 }

@@ -28,6 +28,57 @@ h1 {
   margin: 0 0 3rem 0;
 }
 
+.spotify-section {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 16px;
+
+  .spotify-login, .spotify-authenticated {
+    p {
+      margin: 0.75rem 0;
+      color: #333;
+    }
+
+    .success {
+      color: #1DB954;
+      font-weight: 600;
+    }
+
+    .small {
+      font-size: 0.875rem;
+      color: #999;
+      margin: 0.5rem 0 1.5rem 0;
+    }
+  }
+
+  .divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    color: #999;
+    font-weight: 600;
+    position: relative;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #ddd;
+    }
+
+    &::before {
+      left: 0;
+    }
+
+    &::after {
+      right: 0;
+    }
+  }
+}
+
 .button-group {
   display: flex;
   flex-direction: column;
@@ -73,6 +124,28 @@ h1 {
 
   &:hover {
     background: linear-gradient(135deg, #de7fea 0%, #dd4458 100%);
+  }
+}
+
+.btn-spotify {
+  background: #1DB954;
+  color: white;
+
+  &:hover {
+    background: #1ed760;
+  }
+}
+
+.btn-text {
+  background: transparent;
+  color: #666;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+
+  &:hover {
+    background: #f0f0f0;
+    box-shadow: none;
+    transform: none;
   }
 }
 

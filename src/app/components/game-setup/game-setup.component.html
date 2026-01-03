@@ -1,0 +1,244 @@
+<div class="setup-container">
+  <div class="setup-content">
+    <h1>Game Setup</h1>
+    <p class="subtitle">Configure your music quiz</p>
+
+    @if (error()) {
+      <div class="error-banner">
+        <span class="error-icon">⚠️</span>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <div class="setup-form">
+      <!-- Music Mode Indicator -->
+      <div class="mode-indicator">
+        @if (isAuthenticated()) {
+          <span class="mode-badge premium">🎵 Premium Mode: Full Tracks</span>
+        } @else {
+          <span class="mode-badge free">▶️ Free Mode: 30-second Previews</span>
+        }
+      </div>
+
+      <!-- Genre Selection -->
+      <div class="form-section">
+        <h3>Music Genres</h3>
+        <p class="hint">Select genres to include in your quiz</p>
+
+        <div class="genre-actions">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search genres..."
+            [(ngModel)]="genreSearchTerm"
+          />
+          <button class="btn-small btn-secondary" (click)="selectAllGenres()">
+            Select All
+          </button>
+          <button class="btn-small btn-text" (click)="clearAllGenres()">
+            Clear All
+          </button>
+        </div>
+
+        <div class="genre-grid">
+          @for (genre of filteredGenres; track genre) {
+            <button
+              class="genre-chip"
+              [class.selected]="isGenreSelected(genre)"
+              (click)="toggleGenre(genre)"
+            >
+              {{ genre }}
+            </button>
+          }
+        </div>
+
+        <p class="selected-count">
+          {{ settings().filters.genres.length }} genre(s) selected
+        </p>
+      </div>
+
+      <!-- Year Range -->
+      <div class="form-section">
+        <h3>Year Range</h3>
+        <p class="hint">Filter songs by release year</p>
+
+        <div class="year-range">
+          <div class="year-input-group">
+            <label>From</label>
+            <input
+              type="number"
+              min="1950"
+              max="2025"
+              [value]="settings().filters.yearRange.start"
+              (input)="updateYearStart($any($event.target).value)"
+            />
+          </div>
+
+          <span class="separator">to</span>
+
+          <div class="year-input-group">
+            <label>To</label>
+            <input
+              type="number"
+              min="1950"
+              max="2025"
+              [value]="settings().filters.yearRange.end"
+              (input)="updateYearEnd($any($event.target).value)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Number of Rounds -->
+      <div class="form-section">
+        <h3>Number of Rounds</h3>
+        <p class="hint">How many songs to guess (1-20)</p>
+
+        <input
+          type="number"
+          min="1"
+          max="20"
+          class="rounds-input"
+          [value]="settings().rounds"
+          (input)="updateRounds($any($event.target).value)"
+        />
+      </div>
+
+      <!-- Question Types -->
+      <div class="form-section">
+        <h3>Question Types</h3>
+        <p class="hint">What players need to guess (select at least one)</p>
+
+        <div class="question-types">
+          @for (type of questionTypes; track type) {
+            <button
+              class="question-type-chip"
+              [class.selected]="isQuestionTypeSelected(type)"
+              (click)="toggleQuestionType(type)"
+            >
+              {{ questionTypeLabels[type] }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Answer Mode -->
+      <div class="form-section">
+        <h3>Answer Validation</h3>
+        <p class="hint">How to validate player answers</p>
+
+        <div class="answer-modes">
+          <button
+            class="answer-mode-option"
+            [class.selected]="settings().answerMode === 'fuzzy'"
+            (click)="setAnswerMode('fuzzy')"
+          >
+            <strong>Fuzzy Match</strong>
+            <span class="mode-description">Allows typos and variations</span>
+          </button>
+
+          <button
+            class="answer-mode-option"
+            [class.selected]="settings().answerMode === 'multiple-choice'"
+            (click)="setAnswerMode('multiple-choice')"
+          >
+            <strong>Multiple Choice</strong>
+            <span class="mode-description">4 options to choose from</span>
+          </button>
+
+          <button
+            class="answer-mode-option"
+            [class.selected]="settings().answerMode === 'exact'"
+            (click)="setAnswerMode('exact')"
+          >
+            <strong>Exact Match</strong>
+            <span class="mode-description">Must type exact answer</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Time Limit -->
+      <div class="form-section">
+        <h3>Time Limit</h3>
+        <p class="hint">Give players a time limit per question</p>
+
+        <div class="time-limit-toggle">
+          <label class="toggle-switch">
+            <input
+              type="checkbox"
+              [checked]="settings().timeLimit > 0"
+              (change)="toggleTimeLimit()"
+            />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">
+              @if (settings().timeLimit > 0) {
+                Enabled ({{ settings().timeLimit }}s)
+              } @else {
+                Disabled
+              }
+            </span>
+          </label>
+        </div>
+
+        @if (settings().timeLimit > 0) {
+          <input
+            type="range"
+            min="10"
+            max="60"
+            step="5"
+            class="time-slider"
+            [value]="settings().timeLimit"
+            (input)="updateTimeLimit($any($event.target).value)"
+          />
+        }
+      </div>
+
+      <!-- Audio Playback -->
+      <div class="form-section">
+        <h3>Audio Playback</h3>
+        <p class="hint">Where should music play?</p>
+
+        <div class="audio-modes">
+          <button
+            class="audio-mode-option"
+            [class.selected]="settings().audioPlayback === 'all-devices'"
+            (click)="setAudioPlayback('all-devices')"
+          >
+            <strong>🔊 All Devices</strong>
+            <span class="mode-description">Everyone hears audio on their device</span>
+          </button>
+
+          <button
+            class="audio-mode-option"
+            [class.selected]="settings().audioPlayback === 'host-only'"
+            (click)="setAudioPlayback('host-only')"
+          >
+            <strong>🔉 Host Only</strong>
+            <span class="mode-description">Only host plays audio (same room)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button class="btn btn-secondary" (click)="cancel()" [disabled]="isGenerating()">
+          Cancel
+        </button>
+
+        <button
+          class="btn btn-primary"
+          (click)="startGame()"
+          [disabled]="isGenerating()"
+        >
+          @if (isGenerating()) {
+            <span class="btn-icon">⏳</span>
+            <span>Generating Quiz...</span>
+          } @else {
+            <span class="btn-icon">🎮</span>
+            <span>Start Game</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

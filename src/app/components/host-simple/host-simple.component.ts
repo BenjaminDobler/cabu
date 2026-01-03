@@ -1,11 +1,12 @@
 import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { WebRTCSimpleService } from '../../services/webrtc-simple.service';
 
 @Component({
   selector: 'app-host-simple',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './host-simple.component.html',
   styleUrl: './host-simple.component.scss'
 })
@@ -25,7 +26,7 @@ export class HostSimpleComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     try {
-      await this.webrtcService.hostGame();
+      await this.webrtcService.hostGame('Test Host');
       this.loading.set(false);
     } catch (err: any) {
       this.error.set(err.message || 'Failed to create game');
@@ -53,7 +54,14 @@ export class HostSimpleComponent implements OnInit, OnDestroy {
   sendTestMessage(): void {
     const message = this.testMessage();
     if (message.trim()) {
-      this.webrtcService.sendMessage(message);
+      // Use the new game message format
+      const gameMessage = {
+        type: 'player-joined' as const,
+        from: 'test-host',
+        timestamp: Date.now(),
+        data: { message: message }
+      };
+      this.webrtcService.sendGameMessage(gameMessage);
       this.testMessage.set('');
     }
   }

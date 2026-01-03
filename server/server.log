@@ -1,0 +1,303 @@
+🚀 Cabu Music Quiz Server running on port 8080
+   Health check: http://localhost:8080/health
+   WebSocket: ws://localhost:8080
+   OAuth endpoints (Premium users):
+     GET  /api/spotify/auth/url
+     POST /api/spotify/auth/callback
+     GET  /api/spotify/session/:id
+   Preview endpoints (Free users):
+     GET  /api/spotify/preview/:trackId
+     POST /api/spotify/preview/batch
+   API endpoints (authenticated):
+     POST /api/spotify/search
+     POST /api/spotify/track/:id
+     POST /api/quiz/generate
+   Spotify: ✓ OAuth Configured
+Quiz generation mode: Free (Preview URLs)
+✓ Client credentials token obtained
+Searching Spotify with query: genre:"rock" year:2000-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: The Emptiness Machine
+✓ Preview URL found for: Vertigo
+✓ Preview URL found for: Somewhere I Belong
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Don't Stop Believin' (2022 Remaster)
+✓ Preview URL found for: In the End
+✓ Preview URL found for: Numb
+✓ Preview URL found for: Bring Me To Life
+✓ Preview URL found for: Creep
+New client connected
+Received: create-room 
+✓ Room created: KPULH6
+✓ Room deleted: KPULH6
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Note: Using first genre (rock) - multiple genre selection searches first genre only
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Animal I Have Become
+✓ Preview URL found for: Otherside
+✓ Preview URL found for: The Chain - 2004 Remaster
+✓ Preview URL found for: Losing My Religion
+✓ Preview URL found for: Chop Suey!
+New client connected
+Received: create-room 
+✓ Room created: W1XJVO
+New client connected
+Received: join-room W1XJVO
+✓ Player joined: W1XJVO (2/4 players)
+Received: offer W1XJVO
+→ Relayed offer in room W1XJVO
+Received: ice-candidate W1XJVO
+→ Relayed ice-candidate in room W1XJVO
+Received: ice-candidate W1XJVO
+→ Relayed ice-candidate in room W1XJVO
+Received: answer W1XJVO
+→ Relayed answer in room W1XJVO
+Received: ice-candidate W1XJVO
+→ Relayed ice-candidate in room W1XJVO
+Received: ice-candidate W1XJVO
+→ Relayed ice-candidate in room W1XJVO
+✓ Player left: W1XJVO (1/4 players)
+Client disconnected
+✓ Room deleted: W1XJVO
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+✓ Client credentials token obtained
+Note: Using first genre (rock) - multiple genre selection searches first genre only
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Butterfly
+✓ Preview URL found for: Another Day in Paradise - 2016 Remaster
+✓ Preview URL found for: Everybody Wants To Rule The World
+✓ Preview URL found for: Animal I Have Become
+✓ Preview URL found for: BURN IT DOWN
+New client connected
+Received: create-room 
+✓ Room created: FV2PK9
+New client connected
+Received: join-room FV2PK9
+✓ Player joined: FV2PK9 (2/4 players)
+Received: offer FV2PK9
+→ Relayed offer in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: answer FV2PK9
+→ Relayed answer in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: leave-room 
+✓ Player left: FV2PK9 (1/4 players)
+Client disconnected
+New client connected
+Received: join-room FV2PK9
+✓ Player joined: FV2PK9 (2/4 players)
+Received: offer FV2PK9
+→ Relayed offer in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: answer FV2PK9
+→ Relayed answer in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+✓ Player left: FV2PK9 (1/4 players)
+Client disconnected
+New client connected
+Received: join-room FV2PK9
+✓ Player joined: FV2PK9 (2/4 players)
+Received: offer FV2PK9
+→ Relayed offer in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: answer FV2PK9
+→ Relayed answer in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: leave-room 
+✓ Player left: FV2PK9 (1/4 players)
+Client disconnected
+New client connected
+Received: join-room FV2PK9
+✓ Player joined: FV2PK9 (2/4 players)
+Received: offer FV2PK9
+→ Relayed offer in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: answer FV2PK9
+→ Relayed answer in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: ice-candidate FV2PK9
+→ Relayed ice-candidate in room FV2PK9
+Received: leave-room 
+✓ Player left: FV2PK9 (1/4 players)
+Client disconnected
+✓ Room deleted: FV2PK9
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: U7TOVV
+✓ Room deleted: U7TOVV
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: NGP4PX
+New client connected
+Received: join-room NGP4PX
+✓ Player joined: NGP4PX (2/4 players)
+Received: offer NGP4PX
+→ Relayed offer in room NGP4PX
+Received: answer NGP4PX
+→ Relayed answer in room NGP4PX
+Received: ice-candidate NGP4PX
+→ Relayed ice-candidate in room NGP4PX
+Received: ice-candidate NGP4PX
+→ Relayed ice-candidate in room NGP4PX
+Received: ice-candidate NGP4PX
+→ Relayed ice-candidate in room NGP4PX
+Received: ice-candidate NGP4PX
+→ Relayed ice-candidate in room NGP4PX
+✓ Player left: NGP4PX (1/4 players)
+Client disconnected
+✓ Room deleted: NGP4PX
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Note: Using first genre (rock) - multiple genre selection searches first genre only
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Iris
+✓ Preview URL found for: Dreams - 2004 Remaster
+✓ Preview URL found for: Chop Suey!
+✓ Preview URL found for: Animal I Have Become
+✓ Preview URL found for: Somewhere I Belong
+New client connected
+Received: create-room 
+✓ Room created: TRMMI6
+New client connected
+Received: join-room TRMMI6
+✓ Player joined: TRMMI6 (2/4 players)
+Received: offer TRMMI6
+→ Relayed offer in room TRMMI6
+Received: answer TRMMI6
+→ Relayed answer in room TRMMI6
+Received: ice-candidate TRMMI6
+→ Relayed ice-candidate in room TRMMI6
+Received: ice-candidate TRMMI6
+→ Relayed ice-candidate in room TRMMI6
+Received: ice-candidate TRMMI6
+→ Relayed ice-candidate in room TRMMI6
+Received: ice-candidate TRMMI6
+→ Relayed ice-candidate in room TRMMI6
+✓ Player left: TRMMI6 (1/4 players)
+Client disconnected
+✓ Room deleted: TRMMI6
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Note: Using first genre (blues) - multiple genre selection searches first genre only
+Searching Spotify with query: genre:"blues" year:1950-2025
+Query length: 28
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: The Hollow Hour
+✓ Preview URL found for: Livin’ on Borrowed Time
+✓ Preview URL found for: Jealous Guy
+✓ Preview URL found for: The Thrill Is Gone
+✓ Preview URL found for: Fire Starter
+Quiz generation mode: Free (Preview URLs)
+Note: Using first genre (blues) - multiple genre selection searches first genre only
+Searching Spotify with query: genre:"blues" year:1950-2025
+Query length: 28
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: You Were Mine
+✓ Preview URL found for: Aliento De La Marea
+✓ Preview URL found for: The Devil Made Me Do It
+✓ Preview URL found for: How Was It for You
+✓ Preview URL found for: Black Betty
+Quiz generation mode: Free (Preview URLs)
+Note: Using first genre (blues) - multiple genre selection searches first genre only
+Searching Spotify with query: genre:"blues" year:1950-2025
+Query length: 28
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Through My Soul
+✓ Preview URL found for: Livin’ on Borrowed Time
+✓ Preview URL found for: Edgeless Horizon
+✓ Preview URL found for: The Devil Made Me Do It
+✓ Preview URL found for: Voodoo (Live)
+New client connected
+Received: create-room 
+✓ Room created: KR8WIO
+New client connected
+Received: join-room KR8WIO
+✓ Player joined: KR8WIO (2/4 players)
+Received: offer KR8WIO
+→ Relayed offer in room KR8WIO
+Received: answer KR8WIO
+→ Relayed answer in room KR8WIO
+Received: ice-candidate KR8WIO
+→ Relayed ice-candidate in room KR8WIO
+Received: ice-candidate KR8WIO
+→ Relayed ice-candidate in room KR8WIO
+Received: ice-candidate KR8WIO
+→ Relayed ice-candidate in room KR8WIO
+Received: ice-candidate KR8WIO
+→ Relayed ice-candidate in room KR8WIO
+✓ Player left: KR8WIO (1/4 players)
+Client disconnected
+✓ Room deleted: KR8WIO
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"rock" year:1990-2000
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Viva los tioz
+✓ Preview URL found for: Down with the Sickness
+✓ Preview URL found for: Whiskey In The Jar
+✓ Preview URL found for: Out Of The Dark
+✓ Preview URL found for: Butterfly
+New client connected
+Received: create-room 
+✓ Room created: KEHFX7
+New client connected
+Received: join-room KEHFX7
+✓ Player joined: KEHFX7 (2/4 players)
+Received: offer KEHFX7
+→ Relayed offer in room KEHFX7
+Received: answer KEHFX7
+→ Relayed answer in room KEHFX7
+Received: ice-candidate KEHFX7
+→ Relayed ice-candidate in room KEHFX7
+Received: ice-candidate KEHFX7
+→ Relayed ice-candidate in room KEHFX7
+Received: ice-candidate KEHFX7
+→ Relayed ice-candidate in room KEHFX7
+Received: ice-candidate KEHFX7
+→ Relayed ice-candidate in room KEHFX7

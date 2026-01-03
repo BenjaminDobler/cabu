@@ -1,0 +1,246 @@
+<div class="game-container">
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading game...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error">
+      <span class="error-icon">⚠️</span>
+      <h2>Error</h2>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <div class="game-content">
+      <!-- Header -->
+      <div class="game-header">
+        <div class="round-info">
+          <span class="round-label">Round</span>
+          <span class="round-number">{{ currentRound() + 1 }} / {{ questions().length }}</span>
+        </div>
+
+        <div class="score-info">
+          <span class="score-label">Score</span>
+          <span class="score-value">{{ currentScore }}</span>
+          @if (currentStreak > 0) {
+            <span class="streak-badge">🔥 {{ currentStreak }}x</span>
+          }
+        </div>
+
+        <button class="btn-quit" (click)="quit()">
+          ✕
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+      </div>
+
+      <!-- Player Scoreboard (multiplayer only) -->
+      @if (players().length > 1) {
+        <div class="players-scoreboard">
+          <h3 class="scoreboard-title">
+            <span class="players-icon">👥</span>
+            Players
+          </h3>
+          <div class="scoreboard-players">
+            @for (player of players(); track player.id) {
+              @let playerScore = scores().get(player.id);
+              <div class="scoreboard-player" [class.you]="player.id === currentPlayer()?.id">
+                <span class="player-icon">{{ player.role === 'host' ? '👑' : '🎮' }}</span>
+                <span class="player-name">
+                  {{ player.name }}{{ player.id === currentPlayer()?.id ? ' (You)' : '' }}
+                </span>
+                <span class="player-score">{{ playerScore?.totalScore || 0 }}</span>
+                @if (playerScore && playerScore.currentStreak > 0) {
+                  <span class="player-streak">🔥{{ playerScore.currentStreak }}</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (currentQuestion()) {
+        <!-- Album Art & Audio -->
+        <div class="album-section">
+          @if (currentQuestion()!.imageUrl) {
+            <img
+              class="album-art"
+              [src]="currentQuestion()!.imageUrl"
+              [alt]="currentQuestion()!.metadata.title"
+            />
+          } @else {
+            <div class="album-art placeholder">
+              🎵
+            </div>
+          }
+
+          <!-- Audio Controls -->
+          <div class="audio-controls">
+            @if (audioError()) {
+              <div class="audio-error">
+                <div>⚠️ {{ audioError() }}</div>
+                <div class="audio-error-hint">You can still answer without audio</div>
+              </div>
+            } @else {
+              <button
+                class="btn-audio"
+                [class.playing]="isPlaying()"
+                (click)="toggleAudio()"
+              >
+                @if (isPlaying()) {
+                  ⏸ Pause
+                } @else {
+                  ▶️ Play
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Question -->
+        <div class="question-section">
+          <h2 class="question-text">{{ currentQuestion()!.question }}</h2>
+
+          @if (settings()!.timeLimit > 0) {
+            <div class="timer" [class.warning]="timeRemaining() <= 5">
+              <span class="timer-icon">⏱</span>
+              <span class="timer-value">{{ timeRemaining() }}s</span>
+            </div>
+          }
+        </div>
+
+        <!-- Answer Input or Waiting State -->
+        @if (!hasSubmitted()) {
+          <div class="answer-section">
+            @if (settings()!.answerMode === 'multiple-choice') {
+              <!-- Multiple Choice -->
+              <div class="answer-options">
+                @for (option of ['Option A', 'Option B', 'Option C', 'Option D']; track option) {
+                  <button
+                    class="answer-option"
+                    [class.selected]="playerAnswer() === option"
+                    (click)="playerAnswer.set(option)"
+                  >
+                    {{ option }}
+                  </button>
+                }
+              </div>
+            } @else {
+              <!-- Text Input (Fuzzy or Exact) -->
+              <input
+                type="text"
+                class="answer-input"
+                [(ngModel)]="playerAnswer"
+                placeholder="Type your answer..."
+                (keyup.enter)="submitAnswer()"
+                [disabled]="hasSubmitted()"
+                autofocus
+              />
+            }
+
+            <button
+              class="btn btn-primary btn-submit"
+              (click)="submitAnswer()"
+              [disabled]="playerAnswer().trim() === ''"
+            >
+              Submit Answer
+            </button>
+          </div>
+        } @else if (waitingForPlayers()) {
+          <!-- Waiting for other players -->
+          <div class="waiting-section">
+            <div class="spinner-small"></div>
+            <p class="waiting-text">Waiting for other players...</p>
+          </div>
+        } @else if (roundResults().length > 0) {
+          <!-- All Players' Results -->
+          <div class="all-results-section">
+            <h3 class="results-title">Round Results</h3>
+
+            <div class="all-results-list">
+              @for (result of roundResults(); track result.playerId) {
+                <div class="player-result" [class.correct]="result.correct" [class.you]="result.playerId === currentPlayer()?.id">
+                  <div class="result-header">
+                    <span class="result-player">
+                      {{ result.playerName }}{{ result.playerId === currentPlayer()?.id ? ' (You)' : '' }}
+                    </span>
+                    <span class="result-icon-badge">{{ result.correct ? '✓' : '✗' }}</span>
+                  </div>
+                  <div class="result-details">
+                    <span class="result-answer">{{ result.answer }}</span>
+                    @if (result.correct) {
+                      <span class="result-points">+{{ result.points }} pts</span>
+                    }
+                  </div>
+                  <div class="result-stats">
+                    <span class="stat">Total: {{ result.totalScore }}</span>
+                    @if (result.currentStreak > 0) {
+                      <span class="stat">🔥 {{ result.currentStreak }}x</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="correct-answer-display">
+              <strong>Correct Answer:</strong> {{ currentQuestion()!.correctAnswer }}
+            </div>
+          </div>
+        } @else {
+          <!-- Result -->
+          <div class="result-section">
+            @if (isCorrect()) {
+              <div class="result correct">
+                <div class="result-icon">✓</div>
+                <div class="result-text">Correct!</div>
+                <div class="result-answer">{{ currentQuestion()!.correctAnswer }}</div>
+                @if (currentPlayer() && scores().get(currentPlayer()!.id)) {
+                  @let playerScore = scores().get(currentPlayer()!.id);
+                  @if (playerScore && playerScore.roundScores.length > currentRound()) {
+                    <div class="points-earned">
+                      +{{ playerScore.roundScores[currentRound()].totalPoints }} points
+                    </div>
+                  }
+                }
+              </div>
+            } @else {
+              <div class="result incorrect">
+                <div class="result-icon">✗</div>
+                <div class="result-text">Incorrect</div>
+                <div class="result-answer">Correct answer: {{ currentQuestion()!.correctAnswer }}</div>
+                <div class="streak-lost">Streak reset</div>
+              </div>
+            }
+
+            <!-- Song Details -->
+            <div class="song-details">
+              <div class="detail-item">
+                <span class="detail-label">Song</span>
+                <span class="detail-value">{{ currentQuestion()!.metadata.title }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Artist</span>
+                <span class="detail-value">{{ currentQuestion()!.metadata.artist }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Album</span>
+                <span class="detail-value">{{ currentQuestion()!.metadata.album }}</span>
+              </div>
+              @if (currentQuestion()!.metadata.year) {
+                <div class="detail-item">
+                  <span class="detail-label">Year</span>
+                  <span class="detail-value">{{ currentQuestion()!.metadata.year }}</span>
+                </div>
+              }
+            </div>
+
+            <p class="next-round-hint">Next round starting...</p>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

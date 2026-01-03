@@ -81,7 +81,7 @@
             @for (msg of messages(); track msg.timestamp) {
               <div class="message">
                 <span class="message-from">{{ msg.from }}:</span>
-                <span class="message-text">{{ msg.message }}</span>
+                <span class="message-text">{{ msg.type }} - {{ msg.data | json }}</span>
               </div>
             }
           </div>

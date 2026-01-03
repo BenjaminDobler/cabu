@@ -1,11 +1,12 @@
 import { Component, signal, inject, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { WebRTCSimpleService } from '../../services/webrtc-simple.service';
 
 @Component({
   selector: 'app-join-simple',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './join-simple.component.html',
   styleUrl: './join-simple.component.scss'
 })
@@ -36,7 +37,7 @@ export class JoinSimpleComponent implements OnDestroy {
     this.error.set(null);
 
     try {
-      await this.webrtcService.joinGame(code);
+      await this.webrtcService.joinGame(code, 'Test Guest');
       this.joining.set(false);
     } catch (err: any) {
       this.error.set(err.message || 'Failed to join game');
@@ -47,7 +48,14 @@ export class JoinSimpleComponent implements OnDestroy {
   sendTestMessage(): void {
     const message = this.testMessage();
     if (message.trim()) {
-      this.webrtcService.sendMessage(message);
+      // Use the new game message format
+      const gameMessage = {
+        type: 'player-joined' as const,
+        from: 'test-guest',
+        timestamp: Date.now(),
+        data: { message: message }
+      };
+      this.webrtcService.sendGameMessage(gameMessage);
       this.testMessage.set('');
     }
   }

@@ -1,0 +1,180 @@
+<div class="lobby-container">
+  <div class="lobby-content">
+    @if (showNameInput()) {
+      <!-- Player Name Input -->
+      <div class="name-input-section">
+        <h1>Enter Your Name</h1>
+        <p class="subtitle">Choose a name for this game</p>
+
+        @if (error()) {
+          <div class="error-message">
+            <span>⚠️</span>
+            <span>{{ error() }}</span>
+          </div>
+        }
+
+        <div class="name-form">
+          <input
+            type="text"
+            [(ngModel)]="playerName"
+            (keyup.enter)="submitName()"
+            placeholder="Your name"
+            maxlength="20"
+            class="name-input"
+            autofocus
+          />
+          <button class="btn btn-primary" (click)="submitName()">
+            Continue
+          </button>
+        </div>
+      </div>
+    } @else if (loading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Creating game lobby...</p>
+      </div>
+    } @else if (error()) {
+      <div class="error">
+        <span class="error-icon">⚠️</span>
+        <h2>Error</h2>
+        <p>{{ error() }}</p>
+      </div>
+    } @else {
+      <!-- Header -->
+      <div class="lobby-header">
+        <h1>Game Lobby</h1>
+        <p class="subtitle">Waiting for players to join...</p>
+      </div>
+
+      <!-- Room Code Section -->
+      <div class="room-code-section">
+        <div class="room-code-label">Room Code</div>
+        <div class="room-code-display">
+          <span class="room-code">{{ roomCode() }}</span>
+          <button class="btn-copy" (click)="copyRoomCode()">
+            @if (copied()) {
+              ✓ Copied!
+            } @else {
+              📋 Copy
+            }
+          </button>
+        </div>
+        <p class="room-hint">Share this code with players to join</p>
+      </div>
+
+      <!-- Players Section -->
+      <div class="players-section">
+        <h3>
+          <span class="players-icon">👥</span>
+          Players ({{ players().length }}/4)
+        </h3>
+
+        <div class="player-list">
+          @for (player of players(); track player.id) {
+            <div class="player-item" [class.host]="player.role === 'host'">
+              <span class="player-icon">{{ player.role === 'host' ? '👑' : '🎮' }}</span>
+              <span class="player-name">
+                {{ player.name }}{{ player.role === 'host' ? ' (You)' : '' }}
+              </span>
+              <span class="player-status" [class.connected]="player.connected">
+                {{ player.connected ? 'Ready' : 'Disconnected' }}
+              </span>
+            </div>
+          }
+
+          @for (i of [0, 1, 2, 3]; track i) {
+            @if (i >= players().length) {
+              <div class="player-item waiting">
+                <span class="player-icon">⚪</span>
+                <span class="player-name">Waiting...</span>
+                <span class="player-status">Empty</span>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Game Settings Preview -->
+      @if (settings()) {
+        <div class="settings-section">
+          <h3>
+            <span class="settings-icon">⚙️</span>
+            Game Settings
+          </h3>
+
+          <div class="settings-grid">
+            <div class="setting-item">
+              <span class="setting-label">Mode</span>
+              <span class="setting-value">
+                @if (settings()!.useAuthentication) {
+                  🎵 Premium (Full Tracks)
+                } @else {
+                  ▶️ Free (Previews)
+                }
+              </span>
+            </div>
+
+            <div class="setting-item">
+              <span class="setting-label">Rounds</span>
+              <span class="setting-value">{{ settings()!.rounds }}</span>
+            </div>
+
+            <div class="setting-item">
+              <span class="setting-label">Genres</span>
+              <span class="setting-value">{{ genresList }}</span>
+            </div>
+
+            <div class="setting-item">
+              <span class="setting-label">Year Range</span>
+              <span class="setting-value">{{ yearRange }}</span>
+            </div>
+
+            <div class="setting-item">
+              <span class="setting-label">Question Types</span>
+              <span class="setting-value">{{ questionTypesList }}</span>
+            </div>
+
+            <div class="setting-item">
+              <span class="setting-label">Answer Mode</span>
+              <span class="setting-value">{{ answerModeLabel }}</span>
+            </div>
+
+            <div class="setting-item">
+              <span class="setting-label">Time Limit</span>
+              <span class="setting-value">{{ timeLimitLabel }}</span>
+            </div>
+
+            <div class="setting-item">
+              <span class="setting-label">Audio</span>
+              <span class="setting-value">{{ audioModeLabel }}</span>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Questions Ready Indicator -->
+      <div class="questions-ready">
+        <span class="ready-icon">✓</span>
+        <span>{{ questions().length }} questions ready</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="lobby-actions">
+        <button class="btn btn-secondary" (click)="cancel()">
+          Cancel
+        </button>
+
+        <button class="btn btn-primary" (click)="startGame()">
+          <span class="btn-icon">🎮</span>
+          <span>Start Game</span>
+        </button>
+      </div>
+
+      <!-- Connection Status -->
+      <div class="connection-status">
+        <span class="status-indicator" [class.connected]="status() === 'connected'"></span>
+        <span>{{ status() }}</span>
+      </div>
+    }
+  </div>
+</div>

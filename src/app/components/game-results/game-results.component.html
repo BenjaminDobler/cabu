@@ -1,0 +1,207 @@
+<div class="results-container">
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading results...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error">
+      <span class="error-icon">⚠️</span>
+      <h2>Error</h2>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <div class="results-content">
+      <!-- Header -->
+      <div class="results-header">
+        <h1>Game Over!</h1>
+        <p class="subtitle">
+          @if (winner) {
+            🏆 {{ winner.playerName }} wins with {{ winner.totalScore }} points!
+          } @else {
+            Here are your results
+          }
+        </p>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="leaderboard-section">
+        <h3>
+          <span class="leaderboard-icon">📊</span>
+          Final Leaderboard
+        </h3>
+
+        <div class="leaderboard">
+          @for (player of scores(); track player.playerId; let idx = $index) {
+            <div
+              class="leaderboard-item"
+              [class.winner]="idx === 0"
+              [class.selected]="selectedPlayer()?.playerId === player.playerId"
+              (click)="selectPlayer(player)"
+            >
+              <span class="rank">{{ getRankEmoji(idx + 1) }}</span>
+              <div class="player-info">
+                <div class="player-name-row">
+                  <span class="name">{{ player.playerName }}</span>
+                  @if (idx === 0) {
+                    <span class="winner-badge">👑 Winner</span>
+                  }
+                </div>
+                <div class="player-stats-row">
+                  <span class="stat">{{ player.correctAnswers }}/{{ player.roundScores.length }} correct</span>
+                  <span class="stat">{{ getAccuracy(player) }}% accuracy</span>
+                  @if (player.maxStreak > 0) {
+                    <span class="stat">🔥 {{ player.maxStreak }}x streak</span>
+                  }
+                </div>
+              </div>
+              <span class="score">{{ player.totalScore }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Selected Player Details -->
+      @if (selectedPlayer()) {
+        <div class="player-stats-section">
+          <div class="player-header">
+            <span class="player-icon">
+              {{ getPlayerRank(selectedPlayer()!.playerId) === 1 ? '👑' : '🎮' }}
+            </span>
+            <span class="player-name">{{ selectedPlayer()!.playerName }}</span>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Total Score</div>
+              <div class="stat-value highlight">{{ selectedPlayer()!.totalScore }}</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Accuracy</div>
+              <div class="stat-value" [style.color]="getGradeColor(getAccuracy(selectedPlayer()!))">
+                {{ getAccuracy(selectedPlayer()!) }}%
+              </div>
+              <div class="stat-badge" [style.background-color]="getGradeColor(getAccuracy(selectedPlayer()!))">
+                {{ getGrade(getAccuracy(selectedPlayer()!)) }}
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Correct Answers</div>
+              <div class="stat-value">{{ selectedPlayer()!.correctAnswers }} / {{ selectedPlayer()!.roundScores.length }}</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Max Streak</div>
+              <div class="stat-value">
+                @if (selectedPlayer()!.maxStreak > 0) {
+                  🔥 {{ selectedPlayer()!.maxStreak }}x
+                } @else {
+                  0x
+                }
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Avg. Answer Time</div>
+              <div class="stat-value">{{ getAverageTime(selectedPlayer()!) }}s</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Best Round</div>
+              <div class="stat-value">
+                Round {{ getBestRound(selectedPlayer()!).round }}
+                <span class="stat-subtext">({{ getBestRound(selectedPlayer()!).points }} pts)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Round Breakdown Toggle -->
+          <button class="btn-breakdown" (click)="toggleBreakdown()">
+            @if (showRoundBreakdown()) {
+              ▲ Hide Round Breakdown
+            } @else {
+              ▼ Show Round Breakdown
+            }
+          </button>
+
+          <!-- Round Breakdown -->
+          @if (showRoundBreakdown()) {
+            <div class="round-breakdown">
+              <h3>Round by Round</h3>
+              <div class="rounds-list">
+                @for (round of selectedPlayer()!.roundScores; track round.round) {
+                  <div class="round-item" [class.correct]="round.correct" [class.incorrect]="!round.correct">
+                    <div class="round-header">
+                      <span class="round-number">Round {{ round.round }}</span>
+                      @if (round.correct) {
+                        <span class="round-result correct">✓ Correct</span>
+                      } @else {
+                        <span class="round-result incorrect">✗ Wrong</span>
+                      }
+                    </div>
+
+                    <div class="round-details">
+                      <div class="round-answer">
+                        <strong>Your answer:</strong> {{ round.answer || '(no answer)' }}
+                      </div>
+
+                      @if (round.correct) {
+                        <div class="round-points-breakdown">
+                          <div class="breakdown-item">
+                            <span>Base Points:</span>
+                            <span>{{ round.basePoints }}</span>
+                          </div>
+                          <div class="breakdown-item">
+                            <span>Speed Bonus:</span>
+                            <span>+{{ round.speedBonus }}</span>
+                          </div>
+                          <div class="breakdown-item">
+                            <span>Streak Multiplier:</span>
+                            <span>×{{ round.streakMultiplier.toFixed(1) }}</span>
+                          </div>
+                          <div class="breakdown-item">
+                            <span>Difficulty Multiplier:</span>
+                            <span>×{{ round.difficultyMultiplier.toFixed(1) }}</span>
+                          </div>
+                          <div class="breakdown-item total">
+                            <span><strong>Total:</strong></span>
+                            <span><strong>{{ round.totalPoints }}</strong></span>
+                          </div>
+                        </div>
+
+                        <div class="round-time">
+                          Answered in {{ formatTime(round.timeToAnswer) }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-secondary" (click)="newGame()">
+          <span class="btn-icon">🏠</span>
+          <span>New Game</span>
+        </button>
+
+        <button class="btn btn-primary" (click)="playAgain()">
+          <span class="btn-icon">🔄</span>
+          <span>Play Again</span>
+        </button>
+      </div>
+
+      <!-- Share Section (Future Enhancement) -->
+      <div class="share-hint">
+        <p>🎵 Had fun? Share your score with friends!</p>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,108 @@
+<div class="join-container">
+  <div class="join-content">
+    @if (step() === 'enter-code') {
+      <!-- Step 1: Enter Room Code -->
+      <div class="join-section">
+        <h1>Join Game</h1>
+        <p class="subtitle">Enter the room code to join</p>
+
+        @if (error()) {
+          <div class="error-message">
+            <span>⚠️</span>
+            <span>{{ error() }}</span>
+          </div>
+        }
+
+        <div class="join-form">
+          <input
+            type="text"
+            [(ngModel)]="roomCode"
+            (keyup.enter)="submitRoomCode()"
+            placeholder="XXXXXX"
+            maxlength="6"
+            class="code-input"
+            autofocus
+          />
+          <button class="btn btn-primary" (click)="submitRoomCode()">
+            Continue
+          </button>
+          <button class="btn btn-secondary" (click)="goBack()">
+            Back
+          </button>
+        </div>
+      </div>
+    } @else if (step() === 'enter-name') {
+      <!-- Step 2: Enter Player Name -->
+      <div class="join-section">
+        <h1>Enter Your Name</h1>
+        <p class="subtitle">Choose a name for this game</p>
+
+        @if (error()) {
+          <div class="error-message">
+            <span>⚠️</span>
+            <span>{{ error() }}</span>
+          </div>
+        }
+
+        <div class="join-form">
+          <input
+            type="text"
+            [(ngModel)]="playerName"
+            (keyup.enter)="submitName()"
+            placeholder="Your name"
+            maxlength="20"
+            class="name-input"
+            autofocus
+          />
+          <button
+            class="btn btn-primary"
+            (click)="submitName()"
+            [disabled]="loading()"
+          >
+            @if (loading()) {
+              Joining...
+            } @else {
+              Join Game
+            }
+          </button>
+          <button class="btn btn-secondary" (click)="goBack()">
+            Back
+          </button>
+        </div>
+      </div>
+    } @else if (step() === 'waiting') {
+      <!-- Step 3: Waiting for Host to Start -->
+      <div class="waiting-section">
+        <h1>Joined!</h1>
+        <p class="subtitle">Room: {{ roomCode() }}</p>
+
+        <div class="waiting-message">
+          <div class="spinner"></div>
+          <p>Waiting for host to start the game...</p>
+        </div>
+
+        <!-- Show connected players -->
+        <div class="players-section">
+          <h3>Players in room ({{ players().length }})</h3>
+          <div class="player-list">
+            @for (player of players(); track player.id) {
+              <div class="player-item" [class.you]="player.id === webrtcService.player()?.id">
+                <span class="player-icon">{{ player.role === 'host' ? '👑' : '🎮' }}</span>
+                <span class="player-name">
+                  {{ player.name }}{{ player.id === webrtcService.player()?.id ? ' (You)' : '' }}
+                </span>
+                <span class="player-status" [class.connected]="player.connected">
+                  {{ player.connected ? 'Ready' : 'Disconnected' }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <button class="btn btn-secondary" (click)="cancel()">
+          Leave Game
+        </button>
+      </div>
+    }
+  </div>
+</div>

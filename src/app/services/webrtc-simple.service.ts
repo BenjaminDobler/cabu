@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { WebSocketSignalingService } from './websocket-signaling.service';
-import { GameMessage } from '../models/connection.model';
+import { GameMessage, PlayerInfo } from '../models/connection.model';
 
 const RTC_CONFIG: RTCConfiguration = {
   iceServers: [
@@ -11,18 +11,31 @@ const RTC_CONFIG: RTCConfiguration = {
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'failed';
 
+interface PeerConnectionInfo {
+  peerId: string;
+  connection: RTCPeerConnection;
+  dataChannel: RTCDataChannel | null;
+  status: ConnectionStatus;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class WebRTCSimpleService {
   private signalingService = inject(WebSocketSignalingService);
 
+  // For single peer connection (guest mode)
   private peerConnection: RTCPeerConnection | null = null;
   private dataChannel: RTCDataChannel | null = null;
+
+  // For multiple peer connections (host mode)
+  private peerConnections = new Map<string, PeerConnectionInfo>();
 
   private connectionStatus = signal<ConnectionStatus>('disconnected');
   private isHost = signal(false);
   private receivedMessages = signal<GameMessage[]>([]);
+  private currentPlayer = signal<PlayerInfo | null>(null);
+  private playersList = signal<PlayerInfo[]>([]);
 
   // Public signals
   public readonly status = this.connectionStatus.asReadonly();
@@ -30,6 +43,8 @@ export class WebRTCSimpleService {
   public readonly messages = this.receivedMessages.asReadonly();
   public readonly roomCode = this.signalingService.roomCode;
   public readonly playerCount = this.signalingService.players;
+  public readonly player = this.currentPlayer.asReadonly();
+  public readonly players = this.playersList.asReadonly();
 
   public readonly isConnected = computed(() =>
     this.connectionStatus() === 'connected'
@@ -45,22 +60,44 @@ export class WebRTCSimpleService {
   /**
    * Host a new game
    */
-  async hostGame(): Promise<string> {
+  async hostGame(playerName: string): Promise<string> {
     this.isHost.set(true);
+
+    // Create host player info
+    const hostPlayer: PlayerInfo = {
+      id: 'host',
+      name: playerName,
+      role: 'host',
+      connected: true
+    };
+    this.currentPlayer.set(hostPlayer);
+    this.playersList.set([hostPlayer]);
+
     await this.signalingService.connect();
     const roomCode = await this.signalingService.createRoom();
 
     // As host, we wait for guests to connect
-    // The peer connection will be created when we receive an offer
+    // Peer connections will be created when we receive offers
 
+    this.connectionStatus.set('connected');
     return roomCode;
   }
 
   /**
    * Join an existing game
    */
-  async joinGame(roomCode: string): Promise<void> {
+  async joinGame(roomCode: string, playerName: string): Promise<void> {
     this.isHost.set(false);
+
+    // Create guest player info with unique ID
+    const guestPlayer: PlayerInfo = {
+      id: `player-${Date.now()}`,
+      name: playerName,
+      role: 'guest',
+      connected: false
+    };
+    this.currentPlayer.set(guestPlayer);
+
     await this.signalingService.connect();
     await this.signalingService.joinRoom(roomCode);
 
@@ -70,18 +107,45 @@ export class WebRTCSimpleService {
   }
 
   /**
-   * Send a message through the data channel
+   * Send a game message to all connected players
    */
-  sendMessage(message: string): void {
-    if (this.dataChannel?.readyState === 'open') {
-      const gameMessage: GameMessage = {
-        from: this.isHost() ? 'host' : 'guest',
-        message,
-        timestamp: Date.now()
-      };
-      this.dataChannel.send(JSON.stringify(gameMessage));
+  sendGameMessage<T>(message: GameMessage<T>): void {
+    const messageJson = JSON.stringify(message);
+
+    if (this.isHost()) {
+      // Host broadcasts to all guests
+      let sentCount = 0;
+      this.peerConnections.forEach((peerInfo) => {
+        if (peerInfo.dataChannel?.readyState === 'open') {
+          peerInfo.dataChannel.send(messageJson);
+          sentCount++;
+        }
+      });
+      console.log(`Host sent message to ${sentCount} peers`);
     } else {
-      console.error('Data channel not open');
+      // Guest sends to host
+      if (this.dataChannel?.readyState === 'open') {
+        this.dataChannel.send(messageJson);
+      } else {
+        console.error('Data channel not open');
+      }
+    }
+  }
+
+  /**
+   * Send a message to a specific player (host only)
+   */
+  sendToPlayer<T>(playerId: string, message: GameMessage<T>): void {
+    if (!this.isHost()) {
+      console.error('Only host can send to specific players');
+      return;
+    }
+
+    const peerInfo = this.peerConnections.get(playerId);
+    if (peerInfo?.dataChannel?.readyState === 'open') {
+      peerInfo.dataChannel.send(JSON.stringify(message));
+    } else {
+      console.error(`Cannot send to player ${playerId}: channel not open`);
     }
   }
 
@@ -89,18 +153,28 @@ export class WebRTCSimpleService {
    * Disconnect and clean up
    */
   disconnect(): void {
+    // Clean up guest connection
     this.dataChannel?.close();
     this.peerConnection?.close();
+
+    // Clean up host connections
+    this.peerConnections.forEach((peerInfo) => {
+      peerInfo.dataChannel?.close();
+      peerInfo.connection.close();
+    });
+    this.peerConnections.clear();
+
     this.signalingService.disconnect();
 
     this.dataChannel = null;
     this.peerConnection = null;
     this.connectionStatus.set('disconnected');
     this.receivedMessages.set([]);
+    this.playersList.set([]);
   }
 
   /**
-   * Create peer connection
+   * Create peer connection (for guest)
    */
   private async createPeerConnection(): Promise<void> {
     this.peerConnection = new RTCPeerConnection(RTC_CONFIG);
@@ -120,6 +194,8 @@ export class WebRTCSimpleService {
       switch (state) {
         case 'connected':
           this.connectionStatus.set('connected');
+          // Send player info to host
+          this.sendPlayerJoinedMessage();
           break;
         case 'disconnected':
         case 'closed':
@@ -134,21 +210,101 @@ export class WebRTCSimpleService {
       }
     };
 
-    // If we're the guest, create the data channel
-    // If we're the host, we'll receive it via ondatachannel
-    if (!this.isHost()) {
-      this.dataChannel = this.peerConnection.createDataChannel('game');
-      this.setupDataChannel();
-    } else {
-      this.peerConnection.ondatachannel = (event) => {
-        this.dataChannel = event.channel;
-        this.setupDataChannel();
-      };
+    // Guest creates the data channel
+    this.dataChannel = this.peerConnection.createDataChannel('game');
+    this.setupDataChannel();
+  }
+
+  /**
+   * Create peer connection for a specific guest (for host)
+   */
+  private async createPeerConnectionForGuest(guestId: string): Promise<RTCPeerConnection> {
+    const peerConnection = new RTCPeerConnection(RTC_CONFIG);
+
+    const peerInfo: PeerConnectionInfo = {
+      peerId: guestId,
+      connection: peerConnection,
+      dataChannel: null,
+      status: 'connecting'
+    };
+
+    this.peerConnections.set(guestId, peerInfo);
+
+    // Handle ICE candidates
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        this.signalingService.sendIceCandidate(event.candidate);
+      }
+    };
+
+    // Handle connection state changes
+    peerConnection.onconnectionstatechange = () => {
+      const state = peerConnection.connectionState;
+      console.log(`Peer ${guestId} connection state:`, state);
+
+      peerInfo.status = state as ConnectionStatus;
+
+      switch (state) {
+        case 'connected':
+          console.log(`Guest ${guestId} connected`);
+          break;
+        case 'disconnected':
+        case 'closed':
+          this.handlePeerDisconnected(guestId);
+          break;
+        case 'failed':
+          console.error(`Peer ${guestId} connection failed`);
+          break;
+      }
+    };
+
+    // Host receives the data channel
+    peerConnection.ondatachannel = (event) => {
+      peerInfo.dataChannel = event.channel;
+      this.setupDataChannelForGuest(guestId, event.channel);
+    };
+
+    return peerConnection;
+  }
+
+  /**
+   * Send player-joined message after connection established
+   */
+  private sendPlayerJoinedMessage(): void {
+    const player = this.currentPlayer();
+    if (!player) return;
+
+    const message: GameMessage = {
+      type: 'player-joined',
+      from: player.id,
+      timestamp: Date.now(),
+      data: { player }
+    };
+
+    this.sendGameMessage(message);
+  }
+
+  /**
+   * Handle peer disconnection
+   */
+  private handlePeerDisconnected(peerId: string): void {
+    const peerInfo = this.peerConnections.get(peerId);
+    if (peerInfo) {
+      peerInfo.dataChannel?.close();
+      peerInfo.connection.close();
+      this.peerConnections.delete(peerId);
+
+      // Update players list
+      this.playersList.update(players =>
+        players.map(p => p.id === peerId ? { ...p, connected: false } : p)
+      );
+
+      console.log(`Peer ${peerId} disconnected and removed`);
     }
   }
 
   /**
-   * Setup data channel handlers
+   * Setup data channel handlers (for guest)
    */
   private setupDataChannel(): void {
     if (!this.dataChannel) return;
@@ -178,6 +334,64 @@ export class WebRTCSimpleService {
   }
 
   /**
+   * Setup data channel handlers for a specific guest (for host)
+   */
+  private setupDataChannelForGuest(guestId: string, channel: RTCDataChannel): void {
+    channel.onopen = () => {
+      console.log(`Data channel opened with guest ${guestId}`);
+    };
+
+    channel.onclose = () => {
+      console.log(`Data channel closed with guest ${guestId}`);
+    };
+
+    channel.onerror = (error) => {
+      console.error(`Data channel error with guest ${guestId}:`, error);
+    };
+
+    channel.onmessage = (event) => {
+      try {
+        const message: GameMessage = JSON.parse(event.data);
+        this.handleGuestMessage(guestId, message);
+      } catch (error) {
+        console.error('Error parsing message:', error);
+      }
+    };
+  }
+
+  /**
+   * Handle message from a guest player
+   */
+  private handleGuestMessage(guestId: string, message: GameMessage): void {
+    // Handle player-joined messages
+    if (message.type === 'player-joined') {
+      const playerData = message.data as { player: PlayerInfo };
+      this.addPlayer(playerData.player);
+    }
+
+    // Broadcast all messages to the component
+    this.receivedMessages.update(messages => [...messages, message]);
+  }
+
+  /**
+   * Add a new player to the players list
+   */
+  private addPlayer(player: PlayerInfo): void {
+    this.playersList.update(players => {
+      // Check if player already exists
+      const exists = players.some(p => p.id === player.id);
+      if (exists) {
+        // Update existing player
+        return players.map(p => p.id === player.id ? { ...player, connected: true } : p);
+      } else {
+        // Add new player
+        return [...players, { ...player, connected: true }];
+      }
+    });
+    console.log(`Player added: ${player.name} (${player.id})`);
+  }
+
+  /**
    * Create and send offer (guest initiates connection)
    */
   private async createAndSendOffer(): Promise<void> {
@@ -194,15 +408,11 @@ export class WebRTCSimpleService {
    * Handle signaling messages
    */
   private async handleSignalingMessage(message: any): Promise<void> {
-    if (!this.peerConnection && (message.type === 'offer' || message.type === 'answer')) {
-      await this.createPeerConnection();
-    }
-
     switch (message.type) {
       case 'offer':
         // Host receives offer from guest
         if (this.isHost()) {
-          await this.handleOffer(message.sdp);
+          await this.handleOfferFromGuest(message.sdp, message.from);
         }
         break;
 
@@ -214,27 +424,31 @@ export class WebRTCSimpleService {
         break;
 
       case 'ice-candidate':
-        await this.handleIceCandidate(message.candidate);
+        await this.handleIceCandidate(message.candidate, message.from);
         break;
     }
   }
 
   /**
-   * Handle incoming offer (host side)
+   * Handle incoming offer from a guest (host side)
    */
-  private async handleOffer(sdp: string): Promise<void> {
-    if (!this.peerConnection) return;
+  private async handleOfferFromGuest(sdp: string, guestId?: string): Promise<void> {
+    // Generate guest ID if not provided
+    const peerId = guestId || `guest-${Date.now()}`;
 
-    await this.peerConnection.setRemoteDescription({
+    // Create new peer connection for this guest
+    const peerConnection = await this.createPeerConnectionForGuest(peerId);
+
+    await peerConnection.setRemoteDescription({
       type: 'offer',
       sdp
     });
 
-    const answer = await this.peerConnection.createAnswer();
-    await this.peerConnection.setLocalDescription(answer);
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
 
     this.signalingService.sendAnswer(answer.sdp!);
-    this.connectionStatus.set('connecting');
+    console.log(`Host sent answer to guest ${peerId}`);
   }
 
   /**
@@ -252,13 +466,39 @@ export class WebRTCSimpleService {
   /**
    * Handle incoming ICE candidate
    */
-  private async handleIceCandidate(candidate: RTCIceCandidate): Promise<void> {
-    if (!this.peerConnection) return;
+  private async handleIceCandidate(candidate: RTCIceCandidate, from?: string): Promise<void> {
+    if (this.isHost()) {
+      // Host needs to add ICE candidate to the appropriate peer connection
+      if (from) {
+        const peerInfo = this.peerConnections.get(from);
+        if (peerInfo) {
+          try {
+            await peerInfo.connection.addIceCandidate(candidate);
+          } catch (error) {
+            console.error(`Error adding ICE candidate for ${from}:`, error);
+          }
+        }
+      } else {
+        // Try adding to the most recent peer connection
+        const connections = Array.from(this.peerConnections.values());
+        if (connections.length > 0) {
+          const latest = connections[connections.length - 1];
+          try {
+            await latest.connection.addIceCandidate(candidate);
+          } catch (error) {
+            console.error('Error adding ICE candidate:', error);
+          }
+        }
+      }
+    } else {
+      // Guest adds to single peer connection
+      if (!this.peerConnection) return;
 
-    try {
-      await this.peerConnection.addIceCandidate(candidate);
-    } catch (error) {
-      console.error('Error adding ICE candidate:', error);
+      try {
+        await this.peerConnection.addIceCandidate(candidate);
+      } catch (error) {
+        console.error('Error adding ICE candidate:', error);
+      }
     }
   }
 }
