@@ -58,6 +58,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     effect(() => {
       if (!this.webrtcService.hosting()) {
         const messages = this.webrtcService.messages();
+        console.log(`Guest lobby effect: ${messages.length} total messages, lastProcessed: ${this.lastProcessedMessageIndex}`);
 
         // Initialize index on first run
         if (this.lastProcessedMessageIndex === -1 && messages.length > 0) {
@@ -66,24 +67,10 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
           const returningToLobby = this.webrtcService.roomCode() !== null;
 
           if (returningToLobby) {
-            // Play Again scenario - find the most recent game-start message
-            // and skip all messages before it (including old round-start messages)
-            let foundGameStart = false;
-            for (let i = messages.length - 1; i >= 0; i--) {
-              if (messages[i].type === 'game-start') {
-                // Start processing from this message onwards
-                this.lastProcessedMessageIndex = i - 1;
-                foundGameStart = true;
-                console.log(`Guest lobby: Play Again detected, starting from message ${i} (game-start)`);
-                break;
-              }
-            }
-
-            if (!foundGameStart) {
-              // No game-start found, skip all old messages
-              this.lastProcessedMessageIndex = messages.length - 1;
-              console.log(`Guest lobby: Play Again but no game-start found, skipping all ${messages.length} messages`);
-            }
+            // Play Again scenario - skip ALL existing messages (including old round-start)
+            // Only process NEW messages that arrive after we return to lobby
+            this.lastProcessedMessageIndex = messages.length - 1;
+            console.log(`Guest lobby: Play Again detected, skipping all ${messages.length} existing messages`);
           } else {
             // Initial game - process all messages
             console.log('Guest lobby: Initial game, processing all messages');
@@ -94,12 +81,35 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
         for (let i = this.lastProcessedMessageIndex + 1; i < messages.length; i++) {
           const message = messages[i];
           this.lastProcessedMessageIndex = i;
+          console.log(`Guest lobby processing message ${i}: type=${message.type}`);
+
+          // Update game data if host sends new questions (Play Again scenario)
+          if (message.type === 'game-start') {
+            const { settings, questions } = message.data;
+            console.log('Guest lobby: Received new game data, updating sessionStorage');
+            sessionStorage.setItem('gameSettings', JSON.stringify(settings));
+            sessionStorage.setItem('gameQuestions', JSON.stringify(questions));
+            // Also update local signals
+            this.settings.set(settings);
+            this.questions.set(questions);
+          }
 
           // When host clicks "Start Game", they send round-start and navigate to /game
           // Guest should do the same
           if (message.type === 'round-start') {
+            // Prevent multiple navigation attempts using sessionStorage flag
+            const navFlag = sessionStorage.getItem('navigatingToGame');
+            if (navFlag === 'true') {
+              console.log('Guest: Already navigating to game, skipping');
+              break;
+            }
+
             console.log('Guest: Received round-start, host started the game');
-            this.router.navigate(['/game']);
+            sessionStorage.setItem('navigatingToGame', 'true');
+            this.router.navigate(['/game']).then(() => {
+              // Clear flag after navigation completes
+              sessionStorage.removeItem('navigatingToGame');
+            });
             break;
           }
         }
@@ -108,6 +118,9 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    // Clear any stuck navigation flags when entering lobby
+    sessionStorage.removeItem('navigatingToGame');
+
     // Load game settings and questions from session storage
     const settingsJson = sessionStorage.getItem('gameSettings');
     const questionsJson = sessionStorage.getItem('gameQuestions');

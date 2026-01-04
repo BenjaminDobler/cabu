@@ -66,18 +66,38 @@ export class GamePlayComponent implements OnInit, OnDestroy {
       const messages = this.webrtcService.messages();
 
       // Initialize index on first run
-      // Only skip old messages if we have a current round in progress (returning after Play Again)
-      // Otherwise, process messages to receive round-start for initial game
       if (this.lastProcessedMessageIndex === -1 && messages.length > 0) {
-        const hasActiveRound = this.currentRound() > 0 || this.currentQuestion() !== null;
-        if (hasActiveRound) {
-          // Already in a game - skip old messages and return
-          this.lastProcessedMessageIndex = messages.length - 1;
-          console.log(`Game-play: Round in progress, initialized index to ${this.lastProcessedMessageIndex}`);
-          return;
+        // Check if we're returning to game after "Play Again"
+        // Look for the most recent game-start message (if any) that came AFTER game-end
+        // This handles the case where host clicks "Start Game" while guest is navigating to /game
+        let foundRecentGameStart = false;
+
+        // Scan backwards from the end to find the most recent game-start
+        for (let i = messages.length - 1; i >= 0; i--) {
+          if (messages[i].type === 'game-start') {
+            // Found a game-start - check if it's after the most recent game-end
+            let hasGameEndAfter = false;
+            for (let j = i + 1; j < messages.length; j++) {
+              if (messages[j].type === 'game-end') {
+                hasGameEndAfter = true;
+                break;
+              }
+            }
+
+            if (!hasGameEndAfter) {
+              // This game-start has no game-end after it, so it's the current Play Again
+              console.log(`Game-play: Found recent game-start at index ${i}, processing from there`);
+              this.lastProcessedMessageIndex = i - 1;
+              foundRecentGameStart = true;
+              break;
+            }
+          }
         }
-        // New game starting - fall through to process messages (don't return!)
-        console.log('Game-play: New game, processing all messages');
+
+        if (!foundRecentGameStart) {
+          // No recent game-start found, this is the initial game - process all messages
+          console.log('Game-play: Initial game, processing all messages');
+        }
       }
 
       // Process only new messages we haven't seen yet

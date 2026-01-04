@@ -88,7 +88,16 @@ export class GameResultsComponent implements OnInit {
           this.lastProcessedMessageIndex = i;
 
           if (message.type === 'game-start') {
+            // Prevent multiple navigation attempts using sessionStorage flag
+            const navFlag = sessionStorage.getItem('navigatingToLobby');
+            if (navFlag === 'true') {
+              console.log('Guest: Already navigating to lobby, skipping');
+              break;
+            }
+
             console.log('Guest: Host started a new game, navigating to lobby...');
+            sessionStorage.setItem('navigatingToLobby', 'true');
+
             // Store the new game data
             const { settings, questions } = message.data;
             sessionStorage.setItem('gameSettings', JSON.stringify(settings));
@@ -96,7 +105,10 @@ export class GameResultsComponent implements OnInit {
             sessionStorage.removeItem('gameScores');
 
             // Navigate to lobby
-            this.router.navigate(['/lobby']);
+            this.router.navigate(['/lobby']).then(() => {
+              // Clear flag after navigation completes
+              sessionStorage.removeItem('navigatingToLobby');
+            });
             break; // Stop processing once we navigate
           }
         }
