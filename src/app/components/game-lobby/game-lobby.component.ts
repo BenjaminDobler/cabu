@@ -35,6 +35,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   questions = signal<QuizQuestion[]>([]);
   questionTypeLabels = QUESTION_TYPE_LABELS;
   private lastSharedPlayerCount = 0;
+  private lastProcessedMessageIndex = -1;
 
   constructor() {
     // Listen for new players joining (host only)
@@ -50,6 +51,58 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
       } else if (this.webrtcService.hosting() && currentCount === 1) {
         // Initialize for host-only
         this.lastSharedPlayerCount = 1;
+      }
+    });
+
+    // Listen for host starting the game (guests only)
+    effect(() => {
+      if (!this.webrtcService.hosting()) {
+        const messages = this.webrtcService.messages();
+
+        // Initialize index on first run
+        if (this.lastProcessedMessageIndex === -1 && messages.length > 0) {
+          // Check if we're returning to lobby for "Play Again"
+          // We can detect this by checking if we already have a room connection
+          const returningToLobby = this.webrtcService.roomCode() !== null;
+
+          if (returningToLobby) {
+            // Play Again scenario - find the most recent game-start message
+            // and skip all messages before it (including old round-start messages)
+            let foundGameStart = false;
+            for (let i = messages.length - 1; i >= 0; i--) {
+              if (messages[i].type === 'game-start') {
+                // Start processing from this message onwards
+                this.lastProcessedMessageIndex = i - 1;
+                foundGameStart = true;
+                console.log(`Guest lobby: Play Again detected, starting from message ${i} (game-start)`);
+                break;
+              }
+            }
+
+            if (!foundGameStart) {
+              // No game-start found, skip all old messages
+              this.lastProcessedMessageIndex = messages.length - 1;
+              console.log(`Guest lobby: Play Again but no game-start found, skipping all ${messages.length} messages`);
+            }
+          } else {
+            // Initial game - process all messages
+            console.log('Guest lobby: Initial game, processing all messages');
+          }
+        }
+
+        // Process only new messages
+        for (let i = this.lastProcessedMessageIndex + 1; i < messages.length; i++) {
+          const message = messages[i];
+          this.lastProcessedMessageIndex = i;
+
+          // When host clicks "Start Game", they send round-start and navigate to /game
+          // Guest should do the same
+          if (message.type === 'round-start') {
+            console.log('Guest: Received round-start, host started the game');
+            this.router.navigate(['/game']);
+            break;
+          }
+        }
       }
     });
   }
@@ -78,6 +131,15 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
         console.log('Already hosting, reusing existing lobby');
         this.showNameInput.set(false);
         this.loading.set(false);
+        return;
+      }
+
+      // Check if user is a connected guest (returning to lobby for "Play Again")
+      if (!this.webrtcService.hosting() && this.webrtcService.roomCode()) {
+        console.log('Guest returning to lobby, waiting for host to start game');
+        this.showNameInput.set(false);
+        this.loading.set(false);
+        // Guest just waits - they'll receive a message when host starts
         return;
       }
 
