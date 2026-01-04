@@ -65,6 +65,21 @@ export class GamePlayComponent implements OnInit, OnDestroy {
     effect(() => {
       const messages = this.webrtcService.messages();
 
+      // Initialize index on first run
+      // Only skip old messages if we have a current round in progress (returning after Play Again)
+      // Otherwise, process messages to receive round-start for initial game
+      if (this.lastProcessedMessageIndex === -1 && messages.length > 0) {
+        const hasActiveRound = this.currentRound() > 0 || this.currentQuestion() !== null;
+        if (hasActiveRound) {
+          // Already in a game - skip old messages and return
+          this.lastProcessedMessageIndex = messages.length - 1;
+          console.log(`Game-play: Round in progress, initialized index to ${this.lastProcessedMessageIndex}`);
+          return;
+        }
+        // New game starting - fall through to process messages (don't return!)
+        console.log('Game-play: New game, processing all messages');
+      }
+
       // Process only new messages we haven't seen yet
       for (let i = this.lastProcessedMessageIndex + 1; i < messages.length; i++) {
         console.log(`Processing message ${i + 1}/${messages.length}:`, messages[i].type);
@@ -516,23 +531,68 @@ export class GamePlayComponent implements OnInit, OnDestroy {
           this.audioElement = new Audio(question.previewUrl);
           this.audioElement.volume = 1.0;
 
-          this.audioElement.addEventListener('play', () => this.isPlaying.set(true));
+          let hasPlayedSuccessfully = false;
+
+          this.audioElement.addEventListener('play', () => {
+            this.isPlaying.set(true);
+            hasPlayedSuccessfully = true;
+            // Clear any error when audio successfully starts playing
+            this.audioError.set(null);
+            console.log('Audio started playing successfully');
+          });
+
+          this.audioElement.addEventListener('playing', () => {
+            hasPlayedSuccessfully = true;
+            this.audioError.set(null);
+          });
+
           this.audioElement.addEventListener('pause', () => this.isPlaying.set(false));
           this.audioElement.addEventListener('ended', () => this.isPlaying.set(false));
           this.audioElement.addEventListener('error', (e) => {
-            console.error('Audio error:', e);
-            this.audioError.set('Failed to play audio');
+            console.error('Audio element error event:', e);
             this.isPlaying.set(false);
+            // Only show error if audio never successfully started
+            if (!hasPlayedSuccessfully) {
+              setTimeout(() => {
+                if (!hasPlayedSuccessfully) {
+                  this.audioError.set('Failed to play audio');
+                }
+              }, 500);
+            }
           });
 
-          await this.audioElement.play();
+          // Clear error when audio can play
+          this.audioElement.addEventListener('canplay', () => {
+            console.log('Audio can play');
+            this.audioError.set(null);
+          });
+
+          try {
+            await this.audioElement.play();
+            console.log('Audio play() promise resolved');
+          } catch (playError: any) {
+            // Handle autoplay policy - don't show error if it's just an autoplay restriction
+            if (playError.name === 'NotAllowedError' || playError.name === 'NotSupportedError') {
+              console.log('Autoplay prevented, audio will play after user interaction');
+              // Don't set error for autoplay policy - the audio will likely play after interaction
+            } else {
+              console.error('Audio play error (non-autoplay):', playError);
+              // Only set error if audio never played
+              if (!hasPlayedSuccessfully) {
+                throw playError; // Re-throw other errors to be caught by outer catch
+              }
+            }
+          }
         } else {
           this.audioError.set('No preview URL available for this track');
         }
       }
     } catch (err: any) {
-      console.error('Error playing audio:', err);
-      this.audioError.set(err.message || 'Failed to play audio');
+      // Only set error for real failures, not autoplay policy issues
+      console.error('Error playing audio (outer catch):', err);
+      if (err.name !== 'NotAllowedError' && err.name !== 'NotSupportedError') {
+        this.audioError.set(err.message || 'Failed to play audio');
+      }
     }
   }
 
@@ -616,23 +676,12 @@ export class GamePlayComponent implements OnInit, OnDestroy {
         this.isCorrect.set(isCorrect);
         this.calculateScore(isCorrect);
 
-        // In single player, create a simple result entry
-        const player = this.currentPlayer();
-        if (player) {
-          this.roundResults.set([{
-            playerId: player.id,
-            playerName: player.name,
-            answer: answer,
-            correct: isCorrect,
-            points: this.scores().get(player.id)?.roundScores[this.currentRound()]?.totalPoints || 0,
-            totalScore: this.scores().get(player.id)?.totalScore || 0,
-            currentStreak: this.scores().get(player.id)?.currentStreak || 0
-          }]);
-        }
+        // In single player mode, don't use roundResults - let template use isCorrect signal
+        // This shows the single player result view (lines 192-216 in template)
 
         setTimeout(() => {
           this.stopAudio();
-          this.roundResults.set([]); // Clear results
+          this.isCorrect.set(null); // Reset for next round
           this.startRound(this.currentRound() + 1);
         }, 3000);
       } else {

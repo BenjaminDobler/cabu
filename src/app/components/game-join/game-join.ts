@@ -35,6 +35,13 @@ export class GameJoinComponent implements OnDestroy {
     effect(() => {
       const messages = this.webrtcService.messages();
 
+      // Initialize index on first run
+      // For game-join, always process all messages to receive game-start
+      if (this.lastProcessedMessageIndex === -1 && messages.length > 0) {
+        console.log(`Game-join: Processing all messages from start`);
+        // Don't return - fall through to process messages
+      }
+
       // Process only new messages we haven't seen yet
       for (let i = this.lastProcessedMessageIndex + 1; i < messages.length; i++) {
         this.handleGameMessage(messages[i]);

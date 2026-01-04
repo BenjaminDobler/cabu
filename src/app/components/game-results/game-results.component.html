@@ -193,23 +193,36 @@
             <p>Preparing new game...</p>
           </div>
         } @else {
-          <button class="btn btn-secondary" (click)="newGame()">
-            <span class="btn-icon">🏠</span>
-            <span>New Game</span>
-          </button>
+          @if (isHost()) {
+            <!-- Host controls -->
+            <button class="btn btn-secondary" (click)="newGame()">
+              <span class="btn-icon">🏠</span>
+              <span>New Game</span>
+            </button>
 
-          @if (isHost() && players().length > 1) {
-            <!-- Host in multiplayer -->
-            <button class="btn btn-primary" (click)="playAgain()">
-              <span class="btn-icon">🔄</span>
-              <span>Play Again with {{ players().length }} Players</span>
-            </button>
+            @if (players().length > 1) {
+              <!-- Multiplayer - show player count -->
+              <button class="btn btn-primary" (click)="playAgain()">
+                <span class="btn-icon">🔄</span>
+                <span>Play Again with {{ players().length }} Players</span>
+              </button>
+            } @else {
+              <!-- Single player -->
+              <button class="btn btn-primary" (click)="playAgain()">
+                <span class="btn-icon">🔄</span>
+                <span>Play Again</span>
+              </button>
+            }
           } @else {
-            <!-- Single player or guest -->
-            <button class="btn btn-primary" (click)="playAgain()">
-              <span class="btn-icon">🔄</span>
-              <span>Play Again</span>
+            <!-- Guest controls -->
+            <button class="btn btn-secondary" (click)="newGame()">
+              <span class="btn-icon">🏠</span>
+              <span>Leave Game</span>
             </button>
+
+            <div class="guest-waiting-message">
+              <p>⏳ Waiting for host to start a new game...</p>
+            </div>
           }
         }
       </div>

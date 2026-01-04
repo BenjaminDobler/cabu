@@ -46,6 +46,42 @@ export class GameResultsComponent implements OnInit {
       if (!this.isHost()) {
         const messages = this.webrtcService.messages();
 
+        // Initialize index on first run
+        if (this.lastProcessedMessageIndex === -1 && messages.length > 0) {
+          // Look for the most recent game-start message (if any) that came AFTER game-end
+          // This handles the case where host clicks Play Again while guest is navigating to results
+          let foundRecentGameStart = false;
+
+          // Scan backwards from the end to find the most recent game-start
+          for (let i = messages.length - 1; i >= 0; i--) {
+            if (messages[i].type === 'game-start') {
+              // Found a game-start - check if it's after the most recent game-end
+              let hasGameEndAfter = false;
+              for (let j = i + 1; j < messages.length; j++) {
+                if (messages[j].type === 'game-end') {
+                  hasGameEndAfter = true;
+                  break;
+                }
+              }
+
+              if (!hasGameEndAfter) {
+                // This game-start has no game-end after it, so it's the current Play Again
+                console.log(`Guest results: Found recent game-start at index ${i}, processing from there`);
+                this.lastProcessedMessageIndex = i - 1;
+                foundRecentGameStart = true;
+                break;
+              }
+            }
+          }
+
+          if (!foundRecentGameStart) {
+            // No recent game-start found, skip all old messages
+            this.lastProcessedMessageIndex = messages.length - 1;
+            console.log(`Guest results: No recent game-start, initialized to ${this.lastProcessedMessageIndex}`);
+            return;
+          }
+        }
+
         // Process only new messages
         for (let i = this.lastProcessedMessageIndex + 1; i < messages.length; i++) {
           const message = messages[i];
@@ -61,6 +97,7 @@ export class GameResultsComponent implements OnInit {
 
             // Navigate to lobby
             this.router.navigate(['/lobby']);
+            break; // Stop processing once we navigate
           }
         }
       }
@@ -174,6 +211,12 @@ export class GameResultsComponent implements OnInit {
 
   // Play again with same settings
   async playAgain(): Promise<void> {
+    // Only host can start a new game
+    if (!this.isHost()) {
+      console.log('Guest cannot start a new game, waiting for host');
+      return;
+    }
+
     const settings = this.settings();
     if (!settings) {
       this.error.set('No settings found');
@@ -220,6 +263,11 @@ export class GameResultsComponent implements OnInit {
 
   // New game (clear everything)
   newGame(): void {
+    // Disconnect from WebRTC if guest is leaving
+    if (!this.isHost()) {
+      this.webrtcService.disconnect();
+    }
+
     sessionStorage.removeItem('gameSettings');
     sessionStorage.removeItem('gameQuestions');
     sessionStorage.removeItem('gameScores');

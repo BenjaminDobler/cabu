@@ -301,3 +301,472 @@ Received: ice-candidate KEHFX7
 → Relayed ice-candidate in room KEHFX7
 Received: ice-candidate KEHFX7
 → Relayed ice-candidate in room KEHFX7
+✓ Player left: KEHFX7 (1/4 players)
+Client disconnected
+✓ Room deleted: KEHFX7
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+✓ Client credentials token obtained
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: The Chain - 2004 Remaster
+✓ Preview URL found for: Irgendwie, irgendwo, irgendwann
+✓ Preview URL found for: Can't Stop
+✓ Preview URL found for: Otherside
+✓ Preview URL found for: Somewhere I Belong
+New client connected
+Received: create-room 
+✓ Room created: 80579Y
+New client connected
+Received: join-room 80579Y
+✓ Player joined: 80579Y (2/4 players)
+Received: offer 80579Y
+→ Relayed offer in room 80579Y
+Received: ice-candidate 80579Y
+→ Relayed ice-candidate in room 80579Y
+Received: ice-candidate 80579Y
+→ Relayed ice-candidate in room 80579Y
+Received: answer 80579Y
+→ Relayed answer in room 80579Y
+Received: ice-candidate 80579Y
+→ Relayed ice-candidate in room 80579Y
+Received: ice-candidate 80579Y
+→ Relayed ice-candidate in room 80579Y
+✓ Player left: 80579Y (1/4 players)
+Client disconnected
+✓ Room deleted: 80579Y
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: 1WPODV
+✓ Room deleted: 1WPODV
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: 3VV5OJ
+✓ Room deleted: 3VV5OJ
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: SCY5BO
+✓ Room deleted: SCY5BO
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Faint
+✓ Preview URL found for: Ohne Dich (schlaf' ich heut Nacht nicht ein)
+✓ Preview URL found for: Otherside
+✓ Preview URL found for: CASTLE OF GLASS
+✓ Preview URL found for: Africa
+New client connected
+Received: create-room 
+✓ Room created: ZAD04T
+New client connected
+Received: join-room ZAD04T
+✓ Player joined: ZAD04T (2/4 players)
+Received: offer ZAD04T
+→ Relayed offer in room ZAD04T
+Received: answer ZAD04T
+→ Relayed answer in room ZAD04T
+Received: ice-candidate ZAD04T
+→ Relayed ice-candidate in room ZAD04T
+Received: ice-candidate ZAD04T
+→ Relayed ice-candidate in room ZAD04T
+Received: ice-candidate ZAD04T
+→ Relayed ice-candidate in room ZAD04T
+Received: ice-candidate ZAD04T
+→ Relayed ice-candidate in room ZAD04T
+New client connected
+Received: join-room ZAD04T
+✓ Player joined: ZAD04T (3/4 players)
+Received: offer ZAD04T
+→ Relayed offer in room ZAD04T
+Received: answer ZAD04T
+→ Relayed answer in room ZAD04T
+Received: ice-candidate ZAD04T
+→ Relayed ice-candidate in room ZAD04T
+Received: ice-candidate ZAD04T
+→ Relayed ice-candidate in room ZAD04T
+Received: ice-candidate ZAD04T
+→ Relayed ice-candidate in room ZAD04T
+Received: ice-candidate ZAD04T
+→ Relayed ice-candidate in room ZAD04T
+✓ Player left: ZAD04T (2/4 players)
+Client disconnected
+✓ Player left: ZAD04T (1/4 players)
+Client disconnected
+✓ Room deleted: ZAD04T
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: 8S5T4R
+✓ Room deleted: 8S5T4R
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: N2Q4DC
+✓ Room deleted: N2Q4DC
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: QULHJ3
+✓ Room deleted: QULHJ3
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: K660RX
+✓ Room deleted: K660RX
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: HJKK1N
+✓ Room deleted: HJKK1N
+Client disconnected
+New client connected
+Received: create-room 
+✓ Room created: GYQ481
+✓ Room deleted: GYQ481
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: The Emptiness Machine
+✓ Preview URL found for: Don't Stop Me Now - Remastered 2011
+✓ Preview URL found for: Smells Like Teen Spirit
+✓ Preview URL found for: Animal I Have Become
+✓ Preview URL found for: Nothing Else Matters - Remastered 2021
+New client connected
+Received: create-room 
+✓ Room created: 5IYPZK
+New client connected
+Received: join-room 5IYPZK
+✓ Player joined: 5IYPZK (2/4 players)
+Received: offer 5IYPZK
+→ Relayed offer in room 5IYPZK
+Received: answer 5IYPZK
+→ Relayed answer in room 5IYPZK
+Received: ice-candidate 5IYPZK
+→ Relayed ice-candidate in room 5IYPZK
+Received: ice-candidate 5IYPZK
+→ Relayed ice-candidate in room 5IYPZK
+Received: ice-candidate 5IYPZK
+→ Relayed ice-candidate in room 5IYPZK
+Received: ice-candidate 5IYPZK
+→ Relayed ice-candidate in room 5IYPZK
+✓ Player left: 5IYPZK (1/4 players)
+Client disconnected
+✓ Room deleted: 5IYPZK
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: One Step Closer
+✓ Preview URL found for: The Emptiness Machine
+✓ Preview URL found for: Animal I Have Become
+✓ Preview URL found for: Last Resort
+✓ Preview URL found for: In the End
+New client connected
+Received: create-room 
+✓ Room created: A4TJLT
+New client connected
+Received: join-room A4TJLT
+✓ Player joined: A4TJLT (2/4 players)
+Received: offer A4TJLT
+→ Relayed offer in room A4TJLT
+Received: ice-candidate A4TJLT
+→ Relayed ice-candidate in room A4TJLT
+Received: ice-candidate A4TJLT
+→ Relayed ice-candidate in room A4TJLT
+Received: answer A4TJLT
+→ Relayed answer in room A4TJLT
+Received: ice-candidate A4TJLT
+→ Relayed ice-candidate in room A4TJLT
+Received: ice-candidate A4TJLT
+→ Relayed ice-candidate in room A4TJLT
+✓ Player left: A4TJLT (1/4 players)
+Client disconnected
+✓ Room deleted: A4TJLT
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: BURN IT DOWN
+✓ Preview URL found for: Let Down
+✓ Preview URL found for: Africa
+✓ Preview URL found for: Everybody Wants To Rule The World
+✓ Preview URL found for: Thunderstruck
+New client connected
+Received: create-room 
+✓ Room created: 9GWGVM
+New client connected
+Received: join-room 9GWGVM
+✓ Player joined: 9GWGVM (2/4 players)
+Received: offer 9GWGVM
+→ Relayed offer in room 9GWGVM
+Received: ice-candidate 9GWGVM
+→ Relayed ice-candidate in room 9GWGVM
+Received: ice-candidate 9GWGVM
+→ Relayed ice-candidate in room 9GWGVM
+Received: answer 9GWGVM
+→ Relayed answer in room 9GWGVM
+Received: ice-candidate 9GWGVM
+→ Relayed ice-candidate in room 9GWGVM
+Received: ice-candidate 9GWGVM
+→ Relayed ice-candidate in room 9GWGVM
+✓ Player left: 9GWGVM (1/4 players)
+Client disconnected
+✓ Room deleted: 9GWGVM
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: The Emptiness Machine
+✓ Preview URL found for: Sweet Child O' Mine
+✓ Preview URL found for: Seven Nation Army
+✓ Preview URL found for: Otherside
+✓ Preview URL found for: Mr. Brightside
+New client connected
+Received: create-room 
+✓ Room created: 2LSQLH
+New client connected
+Received: join-room 2LSQLH
+✓ Player joined: 2LSQLH (2/4 players)
+Received: offer 2LSQLH
+→ Relayed offer in room 2LSQLH
+Received: ice-candidate 2LSQLH
+→ Relayed ice-candidate in room 2LSQLH
+Received: ice-candidate 2LSQLH
+→ Relayed ice-candidate in room 2LSQLH
+Received: answer 2LSQLH
+→ Relayed answer in room 2LSQLH
+Received: ice-candidate 2LSQLH
+→ Relayed ice-candidate in room 2LSQLH
+Received: ice-candidate 2LSQLH
+→ Relayed ice-candidate in room 2LSQLH
+✓ Player left: 2LSQLH (1/4 players)
+Client disconnected
+✓ Room deleted: 2LSQLH
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+✓ Client credentials token obtained
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Numb
+✓ Preview URL found for: Let Down
+✓ Preview URL found for: In the End
+✓ Preview URL found for: CASTLE OF GLASS
+✓ Preview URL found for: Another Day in Paradise - 2016 Remaster
+New client connected
+Received: create-room 
+✓ Room created: 68L0IX
+New client connected
+Received: join-room 68L0IX
+✓ Player joined: 68L0IX (2/4 players)
+Received: offer 68L0IX
+→ Relayed offer in room 68L0IX
+Received: ice-candidate 68L0IX
+→ Relayed ice-candidate in room 68L0IX
+Received: ice-candidate 68L0IX
+→ Relayed ice-candidate in room 68L0IX
+Received: answer 68L0IX
+→ Relayed answer in room 68L0IX
+Received: ice-candidate 68L0IX
+→ Relayed ice-candidate in room 68L0IX
+Received: ice-candidate 68L0IX
+→ Relayed ice-candidate in room 68L0IX
+✓ Player left: 68L0IX (1/4 players)
+Client disconnected
+✓ Room deleted: 68L0IX
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Nothing Else Matters - Remastered 2021
+✓ Preview URL found for: Bring Me To Life
+✓ Preview URL found for: Creep
+✓ Preview URL found for: Hold the Line
+✓ Preview URL found for: Mr. Brightside
+New client connected
+Received: create-room 
+✓ Room created: C6INM5
+New client connected
+Received: join-room C6INM5
+✓ Player joined: C6INM5 (2/4 players)
+Received: offer C6INM5
+→ Relayed offer in room C6INM5
+Received: answer C6INM5
+→ Relayed answer in room C6INM5
+Received: ice-candidate C6INM5
+→ Relayed ice-candidate in room C6INM5
+Received: ice-candidate C6INM5
+→ Relayed ice-candidate in room C6INM5
+Received: ice-candidate C6INM5
+→ Relayed ice-candidate in room C6INM5
+Received: ice-candidate C6INM5
+→ Relayed ice-candidate in room C6INM5
+✓ Player left: C6INM5 (1/4 players)
+Client disconnected
+✓ Room deleted: C6INM5
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+✓ Client credentials token obtained
+Note: Using first genre (rock) - multiple genre selection searches first genre only
+Searching Spotify with query: genre:"rock" year:1950-2025
+Query length: 27
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: The Emptiness Machine
+✓ Preview URL found for: The Emptiness Machine
+✓ Preview URL found for: Smells Like Teen Spirit
+✓ Preview URL found for: Wonderwall - Remastered
+✓ Preview URL found for: Mr. Brightside
+New client connected
+Received: create-room 
+✓ Room created: MVGYIE
+New client connected
+Received: join-room MVGYIE
+✓ Player joined: MVGYIE (2/4 players)
+Received: offer MVGYIE
+→ Relayed offer in room MVGYIE
+Received: ice-candidate MVGYIE
+→ Relayed ice-candidate in room MVGYIE
+Received: ice-candidate MVGYIE
+→ Relayed ice-candidate in room MVGYIE
+Received: answer MVGYIE
+→ Relayed answer in room MVGYIE
+Received: ice-candidate MVGYIE
+→ Relayed ice-candidate in room MVGYIE
+Received: ice-candidate MVGYIE
+→ Relayed ice-candidate in room MVGYIE
+✓ Player left: MVGYIE (1/4 players)
+Client disconnected
+✓ Room deleted: MVGYIE
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"indie" year:1950-2025
+Query length: 28
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Wonderwall - Remastered
+✓ Preview URL found for: Ein Teil
+New client connected
+Received: create-room 
+✓ Room created: ISYIYP
+New client connected
+Received: join-room ISYIYP
+✓ Player joined: ISYIYP (2/4 players)
+Received: offer ISYIYP
+→ Relayed offer in room ISYIYP
+Received: ice-candidate ISYIYP
+→ Relayed ice-candidate in room ISYIYP
+Received: ice-candidate ISYIYP
+→ Relayed ice-candidate in room ISYIYP
+Received: answer ISYIYP
+→ Relayed answer in room ISYIYP
+Received: ice-candidate ISYIYP
+→ Relayed ice-candidate in room ISYIYP
+Received: ice-candidate ISYIYP
+→ Relayed ice-candidate in room ISYIYP
+Received: create-room 
+✓ Room created: LQZ583
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"indie" year:1950-2025
+Query length: 28
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: undressed
+✓ Preview URL found for: Das erste Mal
+✓ Room deleted: LQZ583
+Client disconnected
+✓ Player left: ISYIYP (1/4 players)
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Note: Using first genre (indie) - multiple genre selection searches first genre only
+Searching Spotify with query: genre:"indie" year:1950-2025
+Query length: 28
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Space Song
+✓ Preview URL found for: End of Beginning
+✓ Preview URL found for: Unsicher
+✓ Preview URL found for: Vertigo
+✓ Preview URL found for: All die schönen Worte feat. Faber
+New client connected
+Received: create-room 
+✓ Room created: F0U0SI
+New client connected
+Received: join-room F0U0SI
+✓ Player joined: F0U0SI (2/4 players)
+Received: offer F0U0SI
+→ Relayed offer in room F0U0SI
+Received: ice-candidate F0U0SI
+→ Relayed ice-candidate in room F0U0SI
+Received: ice-candidate F0U0SI
+→ Relayed ice-candidate in room F0U0SI
+Received: answer F0U0SI
+→ Relayed answer in room F0U0SI
+Received: ice-candidate F0U0SI
+→ Relayed ice-candidate in room F0U0SI
+Received: ice-candidate F0U0SI
+→ Relayed ice-candidate in room F0U0SI
+✓ Player left: F0U0SI (1/4 players)
+Client disconnected
+✓ Room deleted: F0U0SI
+Client disconnected
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"indie" year:1950-2025
+Query length: 28
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: Wonderwall - Remastered
+✓ Preview URL found for: Unsicher
+✓ Preview URL found for: All die schönen Worte feat. Faber
+✓ Preview URL found for: Ein Teil
+✓ Preview URL found for: Softcore
+New client connected
+Received: create-room 
+✓ Room created: 4MCHCO
+New client connected
+Received: join-room 4MCHCO
+✓ Player joined: 4MCHCO (2/4 players)
+Received: offer 4MCHCO
+→ Relayed offer in room 4MCHCO
+Received: ice-candidate 4MCHCO
+→ Relayed ice-candidate in room 4MCHCO
+Received: ice-candidate 4MCHCO
+→ Relayed ice-candidate in room 4MCHCO
+Received: answer 4MCHCO
+→ Relayed answer in room 4MCHCO
+Received: ice-candidate 4MCHCO
+→ Relayed ice-candidate in room 4MCHCO
+Received: ice-candidate 4MCHCO
+→ Relayed ice-candidate in room 4MCHCO
+Received: create-room 
+✓ Room created: UMQTTC
+Quiz generation mode: Free (Preview URLs)
+Searching Spotify with query: genre:"indie" year:1950-2025
+Query length: 28
+Found 50 tracks
+Fetched 50 tracks from Spotify
+✓ Preview URL found for: sterne zählen
+✓ Preview URL found for: Kids
+✓ Preview URL found for: undressed
+✓ Preview URL found for: Enjoy the Silence
+✓ Preview URL found for: i walk this earth all by myself

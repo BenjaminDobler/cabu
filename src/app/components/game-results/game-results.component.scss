@@ -546,6 +546,24 @@
   }
 }
 
+.guest-waiting-message {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #667eea;
+
+  p {
+    color: #667eea;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
 .btn {
   display: flex;
   align-items: center;
